@@ -20,7 +20,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
 
-DATABASE_URL = os.getenv("SMARTPOLI_DATABASE_URL", "sqlite:///./smartpoli.db")
+# `or`, not a getenv default: a variable that exists but is empty (easy to create in a host dashboard) must also fall back to the file database.
+DATABASE_URL = os.getenv("SMARTPOLI_DATABASE_URL") or "sqlite:///./smartpoli.db"
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, connect_args=connect_args, pool_pre_ping=True)
