@@ -187,7 +187,7 @@
     dlg.innerHTML = '<b style="font-size:17px">How the twin works</b>' +
       '<p class="twn-sub" style="margin-top:8px"><b>It looks at</b> the sugar so far, how fast it is changing, meals, insulin, the time of day and facts about the patient. <b>It predicts</b> sugar for the next 2 hours with a likely range, and how likely a low or a high is.</p>' +
       '<p class="twn-sub" style="margin-top:8px"><b>It was checked</b> on 21 patients it had never seen: forecasts were off by about 5 mg/dL at 15 minutes and 17 at 60 minutes, better than assuming sugar stays the same (6.7 and 21). The low alert warned about 24 of 25 low events at 1.5 alerts per patient a day. Most alerts are precautionary: about 1 in 14 is followed by a real low within the hour.</p>' +
-      '<p class="twn-sub" style="margin-top:8px"><b>It cannot</b> diagnose or change treatment. It learned from one hospital\'s patients, and a sensor that reads wrong can cause false alarms. How it reacts to missed doses is untested.</p>' +
+      '<p class="twn-sub" style="margin-top:8px"><b>It cannot</b> diagnose or change treatment. It learned from 100 patients in Shanghai, China, and a sensor that reads wrong can cause false alarms. How it reacts to missed doses is untested.</p>' +
       '<form method="dialog" style="margin-top:12px"><button class="primary">Close</button></form>';
     dlg.showModal();
   }
