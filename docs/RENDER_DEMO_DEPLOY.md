@@ -17,7 +17,8 @@ the switches are left off.
 | `SMARTPOLI_DEMO_LOGIN` | `1` |
 | `SMARTPOLI_DEMO_SEED` | `1` |
 | `SMARTPOLI_JWT_SECRET` | any long random text (use the "Generate" button) |
-| `SMARTPOLI_ALLOWED_ORIGINS` | your demo URL, e.g. `https://smartpoli-demo.onrender.com` (add it after the first deploy if you do not know it yet) |
+
+You do **not** need `SMARTPOLI_ALLOWED_ORIGINS`: the pages and the API are served by the same app on the same address, so the browser never applies CORS. (It only matters if a separate website calls the API from another address.)
 
 Leave `SMARTPOLI_DATABASE_URL` **unset**. The demo then uses a file database inside the container; every start re-creates the demo accounts and the two
 patients automatically (reviews and notes you add are cleared when the service restarts, which is fine for a demo). Never point it at the live app's database.
