@@ -1,0 +1,17 @@
+horizon_min,model,MAE,RMSE,MAE_when_sugar_under_100
+15,persistence,6.48,9.56,3.99
+15,straight line,6.25,9.02,4.71
+15,ridge,5.55,7.87,4.17
+15,xgboost,5.28,7.48,3.89
+30,persistence,11.91,17.55,7.61
+30,straight line,13.31,19.41,10.12
+30,ridge,10.87,15.45,8.33
+30,xgboost,10.21,14.64,7.42
+60,persistence,19.99,29.24,13.45
+60,straight line,27.11,39.72,20.59
+60,ridge,18.72,26.29,15.0
+60,xgboost,17.18,24.55,12.96
+120,persistence,30.84,43.67,22.49
+120,straight line,55.16,80.53,40.36
+120,ridge,27.88,37.85,23.27
+120,xgboost,25.53,35.55,19.95

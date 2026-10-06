@@ -6,6 +6,7 @@
 <title>SmartPoli — doctor</title>
 <link rel="stylesheet" href="/static/style.css">
 <link rel="stylesheet" href="/static/doctor.css">
+<link rel="stylesheet" href="/static/twin.css">
 </head>
 <body class="doctor-page">
 <div id="app">
@@ -26,6 +27,7 @@
       <button class="ghost small" id="closeDrawerBtn" aria-label="Close menu">✕</button>
     </div>
     <button data-tab="patients" data-icon="users" class="active"><span class="nav-label">Patients</span></button>
+    <button data-tab="twin" data-icon="chartBar" style="display:none"><span class="nav-label">Digital Twin</span></button>
     <button data-tab="overview" data-icon="alertCircle"><span class="nav-label">Overview</span></button>
     <button data-tab="prescriptions" data-icon="fileText"><span class="nav-label">Prescriptions</span></button>
     <button data-tab="adherence" data-icon="chartBar"><span class="nav-label">Adherence</span></button>
@@ -59,6 +61,7 @@
 
       <div id="currentPatientBar" class="current-patient-bar" style="display:none;"></div>
 
+      <section id="view-twin" style="display:none;"></section>
       <section id="view-overview" class="overview-grid" style="display:none;"></section>
       <section id="view-prescriptions" style="display:none;"></section>
       <section id="view-adherence" style="display:none;"></section>
@@ -82,5 +85,6 @@
 <script src="/static/auth.js"></script>
 <script src="/static/icons.js"></script>
 <script src="/static/doctor.js"></script>
+<script src="/static/twin.js"></script>
 </body>
 </html>

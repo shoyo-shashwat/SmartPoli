@@ -1,0 +1,56 @@
+/* Digital Twin tab (demo copy). Uses the app's own tokens from style.css. */
+#view-twin h2 { margin-top: 0; }
+.twn-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.twn-quiet { color: var(--ink-soft); font-size: 14px; line-height: 1.5; }
+.twn-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.twn-chip { display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; padding: 3px 11px; border-radius: 999px; background: var(--paper); color: var(--ink-soft); border: 1px solid var(--line); }
+.twn-chip.alert { background: var(--alarm-soft); color: #7a2616; border-color: var(--alarm-soft); }
+.twn-chip.watch { background: var(--amber-soft); color: #6a4410; border-color: var(--amber-soft); }
+.twn-chip.calm, .twn-chip.reviewed { background: var(--teal-soft); color: var(--teal-dark); border-color: var(--teal-soft); }
+.twn-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 12px; align-items: start; }
+.twn-layout > * { min-width: 0; }
+.twn-list { padding: 6px; }
+.twn-item { display: grid; grid-template-columns: 10px 1fr auto; gap: 10px; align-items: center; width: 100%; text-align: left; background: transparent; border: 1.5px solid transparent; border-radius: var(--radius-sm); padding: 10px; min-height: 54px; cursor: pointer; font-family: inherit; color: var(--ink); }
+.twn-item:hover { background: var(--paper); }
+.twn-item.sel { background: var(--teal-soft); border-color: var(--teal); }
+.twn-item.sel:hover { background: var(--teal-soft); }
+.twn-item b { font-size: 15.5px; display: block; }
+.twn-item small { display: block; font-size: 13px; margin-top: 1px; }
+.twn-dot { width: 10px; height: 10px; border-radius: 50%; }
+.twn-sep { font-size: 13px; color: var(--ink-soft); padding: 10px 10px 4px; font-weight: 600; }
+.twn-off { opacity: .55; cursor: default; }
+.twn-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+.twn-big { font-size: 30px; line-height: 1.15; font-weight: 700; margin: 8px 0 4px; }
+.twn-sub { color: var(--ink-soft); font-size: 15px; line-height: 1.5; margin: 0; }
+.twn-strip { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin: 14px 0 4px; }
+.twn-cell { border-radius: 8px; padding: 8px 2px; text-align: center; }
+.twn-cell b { display: block; font-size: 19px; line-height: 1.1; }
+.twn-cell span { display: block; font-size: 12px; margin-top: 2px; opacity: .8; }
+.twn-cell.calm { background: var(--teal-soft); color: var(--teal-dark); }
+.twn-cell.watch { background: var(--amber-soft); color: #6a4410; }
+.twn-cell.alert { background: var(--alarm-soft); color: #7a2616; box-shadow: inset 0 0 0 1.5px var(--alarm); }
+.twn-cell.high { background: var(--blue-soft); color: #1b4aa0; }
+.twn-heart { background: var(--amber-soft); border-radius: var(--radius-md); padding: 12px 14px; margin: 14px 0 0; font-size: 15px; line-height: 1.5; color: #5a3a0c; }
+.twn-acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.twn-acts button { min-height: 44px; }
+.twn-more { margin-top: 10px; display: flex; gap: 16px; flex-wrap: wrap; }
+.twn-link { background: none; border: 0; color: var(--teal-dark); font-weight: 600; cursor: pointer; padding: 6px 0; min-height: 32px; font-family: inherit; font-size: 15px; }
+.twn-panel { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+.twn-panel svg { width: 100%; height: auto; display: block; }
+.twn-reason { display: grid; grid-template-columns: 1fr 90px; gap: 10px; align-items: center; font-size: 14.5px; padding: 6px 0; border-top: 1px solid var(--line); }
+.twn-bar { height: 8px; border-radius: 4px; background: var(--line); position: relative; overflow: hidden; }
+.twn-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; }
+.twn-checks { margin: 4px 0 0; padding-left: 20px; font-size: 15px; line-height: 1.6; }
+.twn-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 240px; }
+.twn-controls input[type=range] { flex: 1; min-width: 120px; }
+.twn-log { display: grid; grid-template-columns: 54px 1fr; gap: 10px; font-size: 14.5px; padding: 6px 0; border-top: 1px solid var(--line); }
+#twnToast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: var(--radius-sm); font-size: 14.5px; opacity: 0; transition: opacity .2s; z-index: 70; max-width: 90vw; pointer-events: none; }
+#view-twin dialog, dialog.twn-dlg { border: 0; border-radius: var(--radius-md); padding: 18px; max-width: 520px; width: 92vw; box-shadow: var(--shadow-card-hover); }
+dialog.twn-dlg textarea { width: 100%; min-height: 130px; font: inherit; padding: 10px; border: 1.5px solid var(--line); border-radius: var(--radius-sm); }
+.twn-demo { border: 1.5px solid var(--teal); background: var(--teal-soft); }
+.twn-demo h2 { margin: 0 0 4px; font-size: 20px; }
+.twn-demo p { margin: 0 0 12px; color: var(--ink-soft); font-size: 15px; }
+.twn-cred { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--surface); border-radius: var(--radius-sm); padding: 8px 12px; margin-top: 8px; font-size: 15px; }
+.twn-cred span { color: var(--ink-soft); font-size: 13px; margin-right: 8px; }
+@media (max-width: 860px) { .twn-layout { grid-template-columns: 1fr; } .twn-strip { grid-template-columns: repeat(4, 1fr); } .twn-big { font-size: 26px; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

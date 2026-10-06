@@ -30,6 +30,8 @@ bcrypt==4.2.0
 # see that file for why it's kept separate.
 opencv-python-headless==4.10.0.84
 numpy==1.26.4
+# Digital Twin (demo copy): small CPU-only build, same version that saved the models in twin_models/
+xgboost-cpu==3.4.1
 pytesseract==0.3.13
 
 # Dose-reminder push notifications (Web Push + VAPID) and patient-local time zones.

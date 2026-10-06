@@ -446,6 +446,69 @@ def _migrate_sqlite_add_columns() -> None:
                 ))
 
 
+
+# ---------------------------------------------------------------- Digital Twin (demo copy only; see ml_router.py)
+# New tables only (init_db() can create tables on Postgres but cannot alter existing ones).
+
+class GlucoseReading(Base):
+    """One sugar reading on the 15-minute grid the twin models were trained on."""
+    __tablename__ = "glucose_readings"
+    __table_args__ = (UniqueConstraint("patient_id", "timestamp", name="uq_glucose_patient_ts"),)
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False, index=True)
+    timestamp = Column(DateTime, nullable=False, index=True)
+    value = Column(Float, nullable=False)            # mg/dL
+    source = Column(String, nullable=False, default="cgm")   # 'cgm' | 'replay' | 'manual'
+
+
+class HeartRateReading(Base):
+    """Heart rate; filled only for the CGMacros demo patient."""
+    __tablename__ = "heart_rate_readings"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False, index=True)
+    timestamp = Column(DateTime, nullable=False, index=True)
+    bpm = Column(Float, nullable=False)
+
+
+class TwinEvent(Base):
+    """A meal, insulin dose or oral diabetes medicine with its time (what the model uses as dose timing)."""
+    __tablename__ = "twin_events"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False, index=True)
+    timestamp = Column(DateTime, nullable=False, index=True)
+    kind = Column(String, nullable=False)            # 'meal' | 'insulin' | 'oral'
+    text = Column(String, nullable=True)
+    iu = Column(Float, nullable=True)                # insulin units when known
+
+
+class TwinProfile(Base):
+    """Static (EHR) facts the twin model uses, plus how the demo replay starts."""
+    __tablename__ = "twin_profiles"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False, unique=True, index=True)
+    label = Column(String, nullable=True)            # e.g. "Demo patient A"
+    summary = Column(String, nullable=True)          # one quiet line: "Woman, 74. Insulin, coronary heart disease"
+    data_source = Column(String, nullable=True)      # 'ShanghaiT2DM' | 'CGMacros'
+    sex = Column(Float, nullable=True)               # 1 = female, 2 = male (the training convention)
+    age = Column(Float, nullable=True)
+    bmi = Column(Float, nullable=True)
+    diabetes_years = Column(Float, nullable=True)
+    hba1c = Column(Float, nullable=True)             # mmol/mol
+    egfr = Column(Float, nullable=True)
+    hypertension = Column(Boolean, nullable=False, default=False)
+    on_insulin = Column(Boolean, nullable=False, default=False)
+    on_sulfonylurea = Column(Boolean, nullable=False, default=False)
+    on_metformin = Column(Boolean, nullable=False, default=False)
+    heart_disease = Column(Boolean, nullable=False, default=False)    # coronary, other large-vessel disease or AF
+    sensor_note = Column(String, nullable=True)      # e.g. sensor reads about 10 mg/dL above finger-prick checks
+    confidence = Column(String, nullable=False, default="ok")   # 'ok' | 'low_confidence' | 'withheld'
+    confidence_reason = Column(String, nullable=True)
+    replay_start = Column(DateTime, nullable=True)   # default replay moment for the demo
+
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
     _migrate_sqlite_add_columns()

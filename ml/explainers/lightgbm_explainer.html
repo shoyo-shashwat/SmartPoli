@@ -1,0 +1,98 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LightGBM explainer</title><style>:root{--surface-1:#f4f4f1;--text-primary:#222;--text-secondary:#666;--border-strong:#bbb}body{font-family:sans-serif;max-width:720px;margin:1rem auto;padding:0 1rem;color:#222}.sr-only{position:absolute;left:-9999px}@media(prefers-color-scheme:dark){:root{--surface-1:#2a2a28;--text-primary:#eee;--text-secondary:#aaa;--border-strong:#666}body{background:#1b1b1a;color:#eee}}button{padding:6px 10px}</style></head><body><h2 class="sr-only">Animated explainer: how a gradient-boosted tree model such as LightGBM learns, in six scenes with play, pause and step controls.</h2>
+<div style="padding:.5rem 0">
+<canvas id="cv" style="width:100%;display:block;border-radius:12px;background:var(--surface-1)"></canvas>
+<div id="cap" style="min-height:118px;margin:10px 0 8px"></div>
+<div style="display:flex;align-items:center;gap:8px">
+<button id="prev" aria-label="Previous scene"><i class="ti ti-player-skip-back" aria-hidden="true"></i></button>
+<button id="play" aria-label="Play or pause"><i class="ti ti-player-pause" aria-hidden="true"></i></button>
+<button id="next" aria-label="Next scene"><i class="ti ti-player-skip-forward" aria-hidden="true"></i></button>
+<div id="bar" style="flex:1;display:flex;gap:4px"></div>
+</div>
+</div>
+<script>
+var W=680,H=380,cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=window.devicePixelRatio||1;
+cv.width=W*dpr;cv.height=H*dpr;ctx.scale(dpr,dpr);
+var cs=getComputedStyle(document.documentElement);
+function col(n,f){var v=(cs.getPropertyValue(n)||'').trim();return v||f}
+var TX=col('--text-primary','#222'),TS=col('--text-secondary','#666'),BD=col('--border-strong','#bbb');
+var RED='#E24B4A',GRY='#888780',TEAL='#1D9E75',AMB='#BA7517';
+var seed=11;function rnd(){seed=(seed*16807)%2147483647;return seed/2147483647}
+function gauss(){var u=rnd()||1e-9,v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function sig(z){return 1/(1+Math.exp(-z))}
+function gen(n){var d=[];for(var i=0;i<n;i++){var s=Math.min(220,Math.max(60,130+gauss()*35)),c=Math.min(40,Math.max(-40,gauss()*15));var z=-1.6+0.04*(110-s)+0.05*(-c);d.push({s:s,c:c,y:rnd()<sig(z)?1:0})}return d}
+var tr=gen(240),va=gen(300),N=tr.length,LAM=1,MINL=4,LR=0.1,R=100;
+function fit(idx,F,depth){var g=idx.map(function(i){return tr[i].y-sig(F[i])}),h=idx.map(function(i){var p=sig(F[i]);return p*(1-p)});
+var G=0,Hh=0;for(var k=0;k<g.length;k++){G+=g[k];Hh+=h[k]}
+if(depth==0||idx.length<2*MINL)return{leaf:G/(Hh+LAM)};
+var best=null;['s','c'].forEach(function(f){var o=idx.map(function(i,k){return k}).sort(function(a,b){return tr[idx[a]][f]-tr[idx[b]][f]});var gl=0,hl=0;
+for(var j=0;j<o.length-1;j++){gl+=g[o[j]];hl+=h[o[j]];if(j+1<MINL||o.length-j-1<MINL)continue;var a=tr[idx[o[j]]][f],b=tr[idx[o[j+1]]][f];if(a==b)continue;var gr=G-gl,hr=Hh-hl;var gain=gl*gl/(hl+LAM)+gr*gr/(hr+LAM)-G*G/(Hh+LAM);if(!best||gain>best.gain)best={f:f,thr:(a+b)/2,gain:gain}}});
+if(!best||best.gain<1e-6)return{leaf:G/(Hh+LAM)};
+var L=[],Rr=[];idx.forEach(function(i){(tr[i][best.f]<=best.thr?L:Rr).push(i)});
+return{f:best.f,thr:best.thr,gain:best.gain,l:fit(L,F,depth-1),r:fit(Rr,F,depth-1)}}
+function pred(t,d){return t.leaf!==undefined?t.leaf:(d[t.f]<=t.thr?pred(t.l,d):pred(t.r,d))}
+function loss(D,F){var a=0;for(var i=0;i<D.length;i++){var p=sig(F[i]);a-=D[i].y*Math.log(p)+(1-D[i].y)*Math.log(1-p)}return a/D.length}
+var pos=tr.filter(function(d){return d.y}).length,base=Math.log(pos/(N-pos)),Ft=tr.map(function(){return base}),Fv=va.map(function(){return base});
+var trees=[],Fsnap=[Ft.slice()],curve=[[loss(tr,Ft),loss(va,Fv)]];
+for(var r=0;r<R;r++){var t=fit(tr.map(function(_,i){return i}),Ft,2);trees.push(t);Ft=Ft.map(function(f,i){return f+LR*pred(t,tr[i])});Fv=Fv.map(function(f,i){return f+LR*pred(t,va[i])});Fsnap.push(Ft.slice());curve.push([loss(tr,Ft),loss(va,Fv)])}
+var bestR=0;curve.forEach(function(c,i){if(c[1]<curve[bestR][1])bestR=i});
+var F0=tr.map(function(){return base}),p0=sig(base);
+function X(s){return 50+(s-60)/160*600}function Y(c){return 250-(c+40)/80*230}
+var K=40;function gainAt(f,thr){var gl=0,hl=0,G=0,Hh=0,nl=0;tr.forEach(function(d){var g=d.y-p0,h=p0*(1-p0);G+=g;Hh+=h;if(d[f]<=thr){gl+=g;hl+=h;nl++}});if(nl<MINL||N-nl<MINL)return 0;var gr=G-gl,hr=Hh-hl;return gl*gl/(hl+LAM)+gr*gr/(hr+LAM)-G*G/(Hh+LAM)}
+var rng={s:[60,220],c:[-40,40]},gS=[],gC=[];for(var k=0;k<K;k++){gS.push(gainAt('s',rng.s[0]+(k+.5)/K*160));gC.push(gainAt('c',rng.c[0]+(k+.5)/K*80))}
+var gMax=Math.max.apply(null,gS.concat(gC));
+function ease(u){return u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2}
+function clamp(u,a,b){return Math.max(0,Math.min(1,(u-a)/(b-a)))}
+function txt(s,x,y,c,sz,al){ctx.fillStyle=c||TX;ctx.font=(sz||13)+'px sans-serif';ctx.textAlign=al||'left';ctx.fillText(s,x,y)}
+function frame(xl,yl){ctx.strokeStyle=BD;ctx.lineWidth=1;ctx.strokeRect(50,20,600,230);txt(xl||'sugar right now (mg/dL)',350,272,TS,12,'center');ctx.save();ctx.translate(18,135);ctx.rotate(-Math.PI/2);txt(yl||'change in last 30 min',0,0,TS,12,'center');ctx.restore();txt('low',60,262,TS,11);txt('high',640,262,TS,11,'right');txt('Illustration: made-up data, not real patients',650,372,TS,11,'right')}
+function dot(x,y,r,c,a){ctx.globalAlpha=a==null?1:a;ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,6.2832);ctx.fill();ctx.globalAlpha=1}
+function dots(rf,cf,n){for(var i=0;i<(n==null?N:n);i++){var d=tr[i];dot(X(d.s),Y(d.c),rf?rf(d,i):3.5,cf?cf(d,i):(d.y?RED:GRY),d.y?1:.55)}}
+function line(x1,y1,x2,y2,c,w){ctx.strokeStyle=c;ctx.lineWidth=w||2;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+function pct(f,thr,side){var a=0,b=0;tr.forEach(function(d){if((d[f]<=thr)==side){b++;a+=d.y}});return b?Math.round(100*a/b):0}
+var t1=trees[0];
+function leaves(t,b,out){if(t.leaf!==undefined){out.push({b:b.slice(),v:t.leaf});return out}
+var lo=b.slice(),hi=b.slice();if(t.f=='s'){lo[1]=t.thr;hi[0]=t.thr}else{lo[3]=t.thr;hi[2]=t.thr}leaves(t.l,lo,out);leaves(t.r,hi,out);return out}
+function share(b){var a=0,n=0;tr.forEach(function(d){if(d.s>b[0]&&d.s<=b[1]&&d.c>b[2]&&d.c<=b[3]){n++;a+=d.y}});return n?Math.round(100*a/n):0}
+function rect(b,c,al){var x1=X(b[0]),x2=X(b[1]),y1=Y(b[3]),y2=Y(b[2]);ctx.globalAlpha=al;ctx.fillStyle=c;ctx.fillRect(x1,y1,x2-x1,y2-y1);ctx.globalAlpha=1}
+var ALL=[60,220,-40,40];
+var S=[
+{d:9000,t:'Meet the data',a:'Each dot is one 15-minute look at a patient. Across: sugar right now. Up and down: is sugar rising or falling. A red dot means a real low followed within the hour.',n:'Like a nurse notebook: one line per check, with what happened afterwards written in later.',
+ f:function(u){frame();var n=Math.floor(ease(clamp(u,0,.6))*N);var rc=clamp(u,.65,.9);dots(null,function(d){return d.y&&rc>0?RED:GRY},n);if(rc>0)dots(function(d){return d.y?3.5+3*rc:0},function(){return RED},n);txt('red = a low came next',640,40,RED,13,'right')}},
+{d:13000,t:'Tree 1: find the best question',a:'The computer tries every possible cut on each feature and scores how cleanly the cut separates red from grey. The highest point of the curve is the best cut.',n:'Like sorting laundry: it tries every way to make two piles and keeps the one where the colours separate best.',
+ f:function(u){frame();dots();var m=Math.max.apply(null,gS)>=Math.max.apply(null,gC);var ps=clamp(u,0,.4),pc=clamp(u,.4,.8),lk=clamp(u,.82,1);
+ if(u<.4){var x=X(60+ps*160);line(x,20,x,250,AMB,2)}else if(u<.82){var y=Y(-40+pc*80);line(50,y,650,y,AMB,2)}
+ txt('split quality',50,300,TS,12);txt('cut on sugar',60,318,TS,11);txt('cut on trend',370,318,TS,11);
+ [[gS,50,290,ps],[gC,360,290,pc]].forEach(function(o){ctx.strokeStyle=TEAL;ctx.lineWidth=2;ctx.beginPath();for(var k=0;k<K*o[3];k++){var x=o[1]+k/(K-1)*280,y=360-o[0][k]/gMax*55;if(k==0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.stroke()});
+ if(lk>0){ctx.globalAlpha=lk;var f=t1.f,th=t1.thr;if(f=='s'){var x=X(th);line(x,20,x,250,TX,3);var br=Math.round(100*pos/N);rect([60,th,-40,40],pct('s',th,true)>br?RED:TEAL,.12);rect([th,220,-40,40],pct('s',th,false)>br?RED:TEAL,.12);txt(pct('s',th,true)+'% red',X(th)/2+25,40,TX,13,'center');txt(pct('s',th,false)+'% red',(X(th)+650)/2,40,TX,13,'center')}else{var y=Y(th);line(50,y,650,y,TX,3);var br2=Math.round(100*pos/N);rect([60,220,-40,th],pct('c',th,true)>br2?RED:TEAL,.12);rect([60,220,th,40],pct('c',th,false)>br2?RED:TEAL,.12);txt(pct('c',th,true)+'% red',350,Y(th)+22,TX,13,'center');txt(pct('c',th,false)+'% red',350,Y(th)-12,TX,13,'center')}ctx.globalAlpha=1;txt('best cut: '+(t1.f=='s'?'sugar below '+Math.round(t1.thr):'trend below '+Math.round(t1.thr)),640,300,TX,13,'right')}}},
+{d:11000,t:'Ask a second question inside each pile',a:'Each pile gets its own best cut, so we end up with four boxes. Each box shows how often red happens inside it. That share is the guess of the tree for any new dot that lands there.',n:'Like twenty questions, but only two questions deep.',
+ f:function(u){frame();var all=leaves(t1,ALL,[]);var fl=clamp(u,.55,1);all.forEach(function(l){rect(l.b,l.v>0?RED:TEAL,.08+.16*fl*Math.min(1,Math.abs(l.v)*2))});
+ dots();function draw(t,b,p){if(t.leaf!==undefined)return;var lo=b.slice(),hi=b.slice();if(t.f=='s'){var x=X(t.thr);line(x,Y(b[3]),x,Y(b[2]),TX,3*1);lo[1]=t.thr;hi[0]=t.thr}else{var y=Y(t.thr);line(X(b[0]),y,X(b[1]),y,TX,3);lo[3]=t.thr;hi[2]=t.thr}draw(t.l,lo);draw(t.r,hi)}
+ var g=clamp(u,0,.2);if(t1.f=='s'){line(X(t1.thr),20,X(t1.thr),20+230*g,TX,3)}else{line(50,Y(t1.thr),50+600*g,Y(t1.thr),TX,3)}
+ var kids=clamp(u,.2,.55);ctx.save();ctx.beginPath();ctx.rect(0,0,W,H);ctx.clip();if(kids>0){[t1.l,t1.r].forEach(function(ch,i){if(ch.leaf!==undefined)return;var b=ALL.slice();if(t1.f=='s'){if(i==0)b[1]=t1.thr;else b[0]=t1.thr}else{if(i==0)b[3]=t1.thr;else b[2]=t1.thr}if(ch.f=='s'){var x=X(ch.thr);line(x,Y(b[3]),x,Y(b[3])+(Y(b[2])-Y(b[3]))*kids,TX,3)}else{var y=Y(ch.thr);line(X(b[0]),y,X(b[0])+(X(b[1])-X(b[0]))*kids,y,TX,3)}})}ctx.restore();
+ if(fl>0){ctx.globalAlpha=fl;all.forEach(function(l){var cx=(X(l.b[0])+X(l.b[1]))/2,cy=(Y(l.b[3])+Y(l.b[2]))/2;txt(share(l.b)+'% red',cx,cy,TX,14,'center')});ctx.globalAlpha=1}}},
+{d:11000,t:'Mistakes get a second chance',a:'One tree is weak. The next tree is trained on what the earlier trees still get wrong. Big dot = big mistake. Watch the big red dots shrink as trees are added.',n:'Like a study group: each new member concentrates on the questions the group still gets wrong.',
+ f:function(u){frame();var k=1+Math.round(ease(u)*24);var F=Fsnap[k];dots(function(d,i){return 2.5+12*Math.abs(d.y-sig(F[i]))},null);txt('trees added: '+k,640,40,TX,14,'right');txt('dot size = how wrong the model still is',640,60,TS,12,'right')}},
+{d:11000,t:'Add the votes, then turn the total into a percentage',a:'Each tree nudges the score of one moment up or down. Add all the nudges to the starting score. The total is converted into a probability between 0 and 100%.',n:'Like judges at a competition: each adds or subtracts a few points, and the final tally becomes the verdict.',
+ f:function(u){var hi=0;for(var i=0;i<N;i++){if(tr[i].y&&tr[i].s<95&&tr[i].c<-6){hi=i;break}}var d=tr[hi],T=40,run=[base];for(var k=0;k<T;k++)run.push(run[k]+LR*pred(trees[k],d));
+ var yy=function(v){return 300-(v+3)/5*270};ctx.strokeStyle=BD;ctx.strokeRect(50,20,520,290);txt('score (log-odds)',60,38,TS,12);txt('trees added ->',60,334,TS,12);
+ line(50,yy(0),570,yy(0),BD,1);txt('0',42,yy(0)+4,TS,11,'right');var n=Math.floor(ease(clamp(u,0,.8))*T);
+ for(var k=0;k<n;k++){var x=62+k*12.5,v0=run[k],v1=run[k+1];ctx.fillStyle=v1>=v0?RED:TEAL;ctx.globalAlpha=.8;ctx.fillRect(x,Math.min(yy(v0),yy(v1)),9,Math.max(2,Math.abs(yy(v0)-yy(v1))));ctx.globalAlpha=1}
+ txt('start: '+Math.round(100*sig(base))+'% (the overall rate)',62,yy(base)-8,TS,12);
+ var tot=run[n],pb=sig(tot);txt('score '+tot.toFixed(2),300,60,TX,14);line(600,40,600,310,BD,8);ctx.fillStyle=RED;ctx.fillRect(595,310-270*pb,10,270*pb);txt(Math.round(pb*100)+'%',600,332,TX,16,'center');txt('chance of low',600,352,TS,11,'center');txt('this moment really was followed by a '+(d.y?'low':'safe hour'),62,365,TS,12);txt('Illustration: made-up data',650,372,TS,11,'right')}},
+{d:12000,t:'Know when to stop',a:'Keep adding trees and the score on practice moments keeps improving. But on moments from patients it has never seen, it gets worse after a point: the model is memorising. We stop at the best point.',n:'Like cramming: past a point you learn the quirks of the practice paper, not the subject.',
+ f:function(u){var mn=1e9,mx=0;curve.forEach(function(c){mn=Math.min(mn,c[0],c[1]);mx=Math.max(mx,c[0],c[1])});var xx=function(r){return 60+r/R*580},yy=function(v){return 320-(v-mn)/(mx-mn)*280};
+ ctx.strokeStyle=BD;ctx.strokeRect(60,30,580,290);txt('error (lower is better)',68,48,TS,12);txt('trees added ->',640,342,TS,12,'right');var n=Math.floor(clamp(u,0,.8)*R);
+ [[0,TEAL,'practice moments'],[1,AMB,'unseen patients']].forEach(function(o,j){ctx.strokeStyle=o[1];ctx.lineWidth=2.5;ctx.beginPath();for(var r=0;r<=n;r++){var x=xx(r),y=yy(curve[r][o[0]]);if(r==0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.stroke();txt(o[2],350,70+j*18,o[1],13)});
+ if(u>.82){var a=clamp(u,.82,.95);ctx.globalAlpha=a;line(xx(bestR),30,xx(bestR),320,TX,2);txt('stop here: '+bestR+' trees',xx(bestR)+8,110,TX,14);txt('memorising ->',xx(60),yy(curve[60][1])-14,AMB,13);ctx.globalAlpha=1}txt('Illustration: made-up data',650,372,TS,11,'right')}}
+];
+var si=0,st=0,playing=true,last=null;
+var bar=document.getElementById('bar'),capEl=document.getElementById('cap'),segs=[];
+S.forEach(function(s,i){var b=document.createElement('div');b.style.cssText='flex:1;height:8px;border-radius:4px;background:var(--surface-1);cursor:pointer;overflow:hidden;position:relative';var f=document.createElement('div');f.style.cssText='height:100%;width:0;background:'+TEAL;b.appendChild(f);b.title=s.t;b.onclick=function(){go(i)};bar.appendChild(b);segs.push(f)});
+function setCap(){var s=S[si];capEl.innerHTML='<div style="font-size:16px;font-weight:500;margin-bottom:4px">'+(si+1)+'. '+s.t+'</div><div style="font-size:14px;line-height:1.6">'+s.a+'</div><div style="font-size:14px;line-height:1.6;color:var(--text-secondary);margin-top:4px">'+s.n+'</div>'}
+function go(i){si=Math.max(0,Math.min(S.length-1,i));st=0;setCap()}
+document.getElementById('prev').onclick=function(){go(si-1)};document.getElementById('next').onclick=function(){go(si+1)};
+var pb=document.getElementById('play');pb.onclick=function(){playing=!playing;if(playing&&si==S.length-1&&st>=S[si].d)go(0);pb.innerHTML='<i class="ti ti-player-'+(playing?'pause':'play')+'" aria-hidden="true"></i>'};
+function tick(ts){if(last==null)last=ts;var dt=ts-last;last=ts;if(playing){st+=dt;if(st>=S[si].d){if(si<S.length-1){go(si+1)}else{st=S[si].d;playing=false;pb.innerHTML='<i class="ti ti-player-play" aria-hidden="true"></i>'}}}
+ctx.clearRect(0,0,W,H);S[si].f(Math.min(1,st/S[si].d));segs.forEach(function(f,i){f.style.width=(i<si?100:i==si?Math.min(100,100*st/S[i].d):0)+'%'});requestAnimationFrame(tick)}
+setCap();requestAnimationFrame(tick);
+</script>
+</body></html>

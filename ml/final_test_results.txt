@@ -1,0 +1,57 @@
+development patients 79, locked test patients 21, features 22
+
+=== 1. Warning labels on the locked test group ===
+spike120: test moments 18587, positive rate 0.184, trees 102
+  XGBoost            AUC 0.817  PR AUC 0.482  Brier 0.1198 (base rate 0.1508)  calibration error 0.022
+  logistic regression AUC 0.787  PR AUC 0.451
+  simple rule        AUC 0.662  PR AUC 0.297
+  per-patient AUC over 21 patients with both outcomes: min 0.69, median 0.87, max 0.97
+large_rise120: test moments 20818, positive rate 0.154, trees 98
+  XGBoost            AUC 0.840  PR AUC 0.484  Brier 0.1022 (base rate 0.1302)  calibration error 0.022
+  logistic regression AUC 0.780  PR AUC 0.374
+  simple rule        AUC 0.719  PR AUC 0.329
+  per-patient AUC over 21 patients with both outcomes: min 0.74, median 0.85, max 0.91
+
+=== 2. Forecast on the locked test group (mg/dL) ===
++ 15 min: MAE xgboost 5.18 | persistence 6.66 | straight line 6.17 | ridge 5.46 || sugar<100: xgboost 4.04, persistence 4.39 || band covers 80% (target 80%), mean width 16
++ 30 min: MAE xgboost 10.18 | persistence 12.34 | straight line 13.21 | ridge 10.74 || sugar<100: xgboost 7.74, persistence 8.49 || band covers 80% (target 80%), mean width 32
++ 60 min: MAE xgboost 17.44 | persistence 21.05 | straight line 27.22 | ridge 18.61 || sugar<100: xgboost 13.40, persistence 15.57 || band covers 79% (target 80%), mean width 52
++120 min: MAE xgboost 26.72 | persistence 32.97 | straight line 56.10 | ridge 27.77 || sugar<100: xgboost 21.01, persistence 27.69 || band covers 77% (target 80%), mean width 76
+
+=== 3. Lows on the locked test group ===
+low events in the test group: 25 (patients with a low event: 6), patient-days 248; heart-disease patients: 7 of 21
+Fixed alert rules (90 mg/dL, 100 for heart-disease patients):
+  forecast alert (lowest of +30 and +60 min)     1.50 alerts/patient-day, warned 24 of 25 low events (96%)
+  plain sugar rule                               1.43 alerts/patient-day, warned 22 of 25 low events (88%)
+  sugar + 0.5 x 30-min change                    2.22 alerts/patient-day, warned 25 of 25 low events (100%)
+  constrained warning model at a matched 1.50 alerts/patient-day: warned 19 of 25 low events (76%)
+Per patient with low events (forecast alert): events, warned, alerts per day
+  patient 2001: 6 events, warned 5, 0.68 alerts/day
+  patient 2052: 2 events, warned 2, 1.45 alerts/day
+  patient 2069: 1 events, warned 1, 0.73 alerts/day
+  patient 2081: 1 events, warned 1, 0.49 alerts/day
+  patient 2094: 13 events, warned 13, 2.17 alerts/day
+  patient 2099: 2 events, warned 2, 3.13 alerts/day
+
+=== 4. Demo patient 2094 ===
+forecast alert: 13 low events, warned 13, 2.17 alerts/day over 12.0 days
+showcase window (time, sugar now, predicted lowest, alert):
+  06:07   162.0   167.0  
+  06:22   163.8   166.9  
+  06:37   167.4   173.5  
+  06:52   169.2   189.4  
+  07:07   172.8   193.8  
+  07:22   178.2   202.5  
+  07:37   183.6   197.4  
+  07:52   185.4   189.8  
+  08:07   190.8   190.1  
+  08:22   194.4   194.5  
+  08:37   203.4   199.6  
+  08:52   212.4   211.1  
+  09:07   203.4   192.8  
+  09:22   178.2   151.9  
+  09:37   153.0   128.4  
+  09:52   126.0   104.5  
+  10:07    97.2    82.8  ALERT
+
+models saved in ml/models/ ; finished in 299s

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option C: Worklist</title>
+<link rel="stylesheet" href="../../../backend/static/style.css"><link rel="stylesheet" href="twin_common.css">
+<style>
+.c-layout{display:grid;grid-template-columns:320px 1fr;gap:12px;align-items:start}
+.c-list{padding:8px}.c-row{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;background:transparent;border:1.5px solid transparent;border-radius:var(--radius-sm);padding:10px;min-height:56px;cursor:pointer}
+.c-row.sel{background:var(--teal-soft);border-color:var(--teal)}.c-row:hover{background:var(--paper)}.c-row.sel:hover{background:var(--teal-soft)}
+.c-dot{width:10px;height:10px;border-radius:50%}.c-row small{display:block;color:var(--ink-soft);font-size:13px}.c-row b{font-size:15.5px}
+.c-sum{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.c-strip{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin:10px 0}.c-strip i{height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12.5px;font-weight:600}
+.c-strip .calm{background:var(--teal-soft);color:var(--teal-dark)}.c-strip .watch{background:var(--amber-soft);color:#6a4410}.c-strip .alert{background:var(--alarm-soft);color:#7a2616}.c-strip .high{background:var(--blue-soft);color:#1b4aa0}
+.c-off{opacity:.6;cursor:default}
+.c-layout>*{min-width:0}
+@media(max-width:820px){.c-layout{grid-template-columns:1fr}}
+</style></head>
+<body style="background:var(--paper)">
+<div class="tw-wrap">
+<div class="tw-ribbon"><b>Option C: Worklist.</b> The doctor opens a list of patients sorted by what needs attention, then a detail panel for the selected one. Shows how the twin scales beyond one patient. Only patient A is live; B is illustrative. <a href="index.html">All options</a></div>
+<div class="tw-top"><h2 style="margin:0;font-size:20px">Digital Twin: who needs attention</h2><div class="tw-controls"><button class="primary small" id="play">Play replay</button><input type="range" id="scrub" min="420" max="660" step="15" value="592" aria-label="Replay time"></div></div>
+<div class="c-sum" id="sum"></div>
+<div class="c-layout">
+<div class="card c-list" id="list"></div>
+<div id="detail"></div>
+</div>
+<div class="card" style="margin-top:12px"><b style="font-size:17px">Activity</b><div id="log" style="margin-top:6px"></div></div>
+<div class="card tw-how"><b style="font-size:17px">How this works</b>
+<details><summary>What the twin looks at</summary><p>Sugar so far and how fast it is changing, meals, insulin, time of day, and facts about the patient. It re-checks every 15 minutes and sorts patients by urgency.</p></details>
+<details><summary>How well it works</summary><p>Checked on patients it never saw: forecast error about 5 mg/dL at 15 minutes and 17 at 60 minutes. The low alert warned about 85 to 100 of every 100 lows at 1 to 2 alerts per patient a day (development results; final test last).</p></details>
+<details><summary>What it cannot do</summary><ul><li>It is a risk flag, not a diagnosis.</li><li>One hospital's patients; sensor errors can cause false alarms.</li><li>Patients without a sugar sensor have no twin.</li></ul></details></div>
+<p class="tw-foot">Model demo-0.1. Trained on ShanghaiT2DM (Zhao et al., 2023). Risk flag for the doctor, not a diagnosis.</p>
+</div>
+<script src="twin_common.js"></script>
+<script>
+var sel='A',COL={alert:'#D3402A',watch:'#B4791F',calm:'#12876F',none:'#B4BDB8'},ORDER={alert:0,watch:1,calm:2,none:3};
+function patients(c){return [
+{id:'A',name:'Demo patient A',sub:'Woman, 74. Insulin, heart disease',tier:c.tier,line:c.headline,live:true},
+{id:'B',name:'Demo patient B',sub:'Man, 52. Heart-rate data',tier:'watch',line:'Moderate chance of a high after the next meal',live:false},
+{id:'R',name:'Ramesh',sub:'Existing demo patient',tier:'none',line:'Needs a sugar sensor for a twin',live:false},
+{id:'N',name:'Anita',sub:'Existing demo patient',tier:'none',line:'Needs a sugar sensor for a twin',live:false},
+{id:'V',name:'Vikram',sub:'Existing demo patient',tier:'none',line:'Needs a sugar sensor for a twin',live:false}]}
+function render(){var c=TW.compute(TW.state.now),ps=patients(c).sort(function(a,b){return ORDER[a.tier]-ORDER[b.tier]}),n={alert:0,watch:0,calm:0,none:0};ps.forEach(function(p){n[p.tier]++});
+document.getElementById('sum').innerHTML='<span class="tw-chip" style="background:var(--alarm-soft);color:#7a2616">'+n.alert+' alert</span><span class="tw-chip heart">'+n.watch+' watch</span><span class="tw-chip reviewed">'+n.calm+' calm</span><span class="tw-chip">'+n.none+' without a sensor</span>';
+document.getElementById('list').innerHTML=ps.map(function(p){return '<button class="c-row'+(p.id==sel?' sel':'')+(p.tier=='none'?' c-off':'')+'" data-p="'+p.id+'"><span class="c-dot" style="background:'+COL[p.tier]+'"></span><span><b>'+p.name+'</b><small>'+p.sub+'</small><small style="color:'+COL[p.tier]+'">'+p.line+'</small></span><span class="tw-chip">'+({alert:'Alert',watch:'Watch',calm:'Calm',none:'No twin'}[p.tier])+'</span></button>'}).join('');
+var d='';if(sel=='A'){d='<div class="card"><div class="tw-row" style="justify-content:space-between"><b style="font-size:18px">Demo patient A</b><span class="tw-chip">Replay of anonymised dataset patient</span></div><div class="tw-tier '+c.tier+'" style="margin-top:8px">'+c.headline+'</div><p class="tw-sub">'+c.headSub+'</p><div class="c-strip">'+c.cells.map(function(x){return '<i class="'+x.tier+'" title="+'+x.h+' min">'+Math.round(x.p)+'</i>'}).join('')+'</div><p class="tw-foot" style="margin-top:0">Expected sugar every 15 minutes for the next 2 hours (mg/dL).</p><details class="tw-why" style="margin-top:8px"><summary>Why?</summary>'+TW.reasonsHTML(c.lowReasons)+'</details></div>'+(c.heart?'<div class="tw-heart"><b>Heart note.</b> Coronary heart disease. Low sugar is linked to heart strain.</div>':'')+'<div class="card"><b style="font-size:17px">Your next step</b><div style="margin-top:8px">'+TW.afterHTML(c)+'</div></div>'}
+else if(sel=='B'){d='<div class="card"><div class="tw-row" style="justify-content:space-between"><b style="font-size:18px">Demo patient B</b><span class="tw-chip">Illustrative</span></div><div class="tw-tier watch" style="margin-top:8px">Moderate chance of a high after the next meal</div><p class="tw-sub">Shown with a heart-rate strip beside the sugar forecast. Built in the build phase from CGMacros participant 38.</p></div>'}
+else d='<div class="card"><b style="font-size:17px">No twin for this patient</b><p class="tw-sub">The twin needs a continuous sugar sensor. This patient has none linked yet, so there is nothing to forecast.</p></div>';
+document.getElementById('detail').innerHTML=d;document.getElementById('log').innerHTML=TW.logHTML();document.getElementById('scrub').value=c.now}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-p]');if(b){sel=b.getAttribute('data-p');render()}});
+TW.setOnChange(render);TW.bind();document.getElementById('play').onclick=function(){TW.play(this,render)};document.getElementById('scrub').oninput=function(){TW.state.now=+this.value;TW.state.reviewed=false;TW.state.snooze=false;render()};render();
+</script></body></html>

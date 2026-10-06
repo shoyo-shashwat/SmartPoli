@@ -109,7 +109,7 @@ function setActiveNavAndSection(tabName) {
 function renderCurrentPatientBar() {
   const bar = document.getElementById('currentPatientBar');
   if (!bar) return;
-  if (state.activeTab === 'patients' || state.activeTab === 'settings' || !state.patientId) {
+  if (state.activeTab === 'patients' || state.activeTab === 'settings' || state.activeTab === 'twin' || !state.patientId) {
     bar.style.display = 'none';
     return;
   }
@@ -215,6 +215,7 @@ async function loadPatientDetail() {
 
 function renderActiveDoctorTab() {
   if (state.activeTab === 'settings') return; // static content, already in the page
+  if (state.activeTab === 'twin') { if (window.twinRender) window.twinRender(); return; } // Digital Twin (demo copy): needs no selected patient
   if (!state.patientId || !state.currentReport) return;
   if (state.activeTab === 'patients') renderPatientPreview();
   else if (state.activeTab === 'overview') renderOverviewTab();

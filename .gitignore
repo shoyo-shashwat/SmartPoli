@@ -24,3 +24,17 @@ android/app/build/
 *.aab
 *.apk
 android/*.idsig
+
+# Local-only bundle files (not for the public repo)
+/private/
+/HANDOFF_README.md
+/README_BUNDLE.md
+/HANDOFF_KIRO.md
+/docs_claude/
+
+# Digital Twin demo patients. demo_a.json (ShanghaiT2DM, CC BY 4.0) is committed WITH attribution (see backend/twin_demo_data/README.md).
+# demo_b.json (CGMacros, share-alike / non-commercial licence) stays out of the public repo; deploy it from a private branch with `git add -f`.
+/backend/twin_demo_data/demo_b.json
+/backend/demo_local.db
+
+ml/demo_b.packed.txt

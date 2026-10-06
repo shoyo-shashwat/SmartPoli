@@ -136,6 +136,8 @@ FOOD_RULESET = load_food_ruleset()
 app.include_router(auth_router.router)
 app.include_router(caregiver_router.router)
 app.include_router(doctor_router.router)
+import ml_router  # noqa: E402
+app.include_router(ml_router.router)
 app.include_router(whatsapp_router.router)
 
 class PublicStaticFiles(StaticFiles):
@@ -334,6 +336,14 @@ def internal_reminder_sweep(x_cron_secret: Optional[str] = Header(None)):
 @app.on_event("startup")
 def on_startup():
     init_db()
+    if os.getenv("SMARTPOLI_DEMO_SEED") == "1":      # demo copy only: demo accounts + the Digital Twin demo patients
+        try:
+            import seed as _seed
+            import twin_demo_seed
+            _seed.seed()
+            twin_demo_seed.seed_twin_demo()
+        except Exception:
+            logging.getLogger("smartpoli").exception("demo seeding failed")
     if os.getenv("SMARTPOLI_AUTO_SEED") == "1":
         # Opt-in only (e.g. Render, where there's no shell on the free plan
         # to run `python seed.py` by hand). seed() itself is idempotent —

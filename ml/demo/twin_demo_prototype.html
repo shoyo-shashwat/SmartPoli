@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartPoli demo: Digital Twin prototype</title>
+<link rel="stylesheet" href="../../backend/static/style.css">
+<style>
+.tw-wrap{max-width:980px;margin:0 auto;padding:16px 16px 48px}
+.tw-ribbon{background:var(--amber-soft);color:#6a4410;border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;margin-bottom:20px}
+.tw-screen-title{font-size:13px;color:var(--ink-soft);margin:28px 0 8px;font-weight:600}
+.tw-demo-card{border:1.5px solid var(--teal);background:var(--teal-soft)}
+.tw-demo-card h2{margin:0 0 4px;font-size:20px}
+.tw-demo-card p{margin:0 0 12px;color:var(--ink-soft);font-size:15px}
+.tw-cred{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface);border-radius:var(--radius-sm);padding:8px 12px;margin-top:8px;font-size:15px}
+.tw-cred span{color:var(--ink-soft);font-size:13px;margin-right:8px}
+.tw-cred code{font-size:15px}
+.tw-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tw-chip{display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:3px 11px;border-radius:999px;background:var(--paper);color:var(--ink-soft);border:1px solid var(--line)}
+.tw-chip.heart{background:var(--amber-soft);color:#6a4410;border-color:var(--amber-soft)}
+.tw-tabs{display:flex;gap:8px;margin:0 0 12px;flex-wrap:wrap}
+.tw-tabs button{min-height:44px}
+.tw-tabs button[disabled]{opacity:.55;cursor:not-allowed}
+.tw-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.tw-guide div{display:flex;gap:10px;font-size:15px;line-height:1.45}
+.tw-n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.tw-chart{width:100%;height:auto;display:block}
+.tw-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}
+.tw-controls input[type=range]{flex:1;min-width:160px}
+.tw-controls input[type=checkbox]{width:20px;height:20px;flex:none;margin:0}
+.tw-controls label{white-space:nowrap}
+.tw-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tw-tier{font-size:30px;font-weight:700;line-height:1.1;margin:2px 0 6px}
+.tw-tier.calm{color:var(--teal-dark)}.tw-tier.watch{color:var(--amber)}.tw-tier.alert{color:var(--alarm)}
+.tw-sub{color:var(--ink-soft);font-size:15px;margin:0 0 10px;line-height:1.5}
+.tw-why{margin-top:8px}
+.tw-why summary{cursor:pointer;font-weight:600;color:var(--teal-dark);min-height:32px;display:flex;align-items:center}
+.tw-reason{display:grid;grid-template-columns:1fr 90px;gap:10px;align-items:center;font-size:14.5px;padding:6px 0;border-top:1px solid var(--line)}
+.tw-bar{height:8px;border-radius:4px;background:var(--line);position:relative;overflow:hidden}
+.tw-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px}
+.tw-heart{background:var(--amber-soft);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:12px;font-size:15px;line-height:1.5;color:#5a3a0c}
+.tw-how details{border-top:1px solid var(--line);padding:10px 0}
+.tw-how details:first-of-type{border-top:0}
+.tw-how summary{cursor:pointer;font-weight:600;font-size:16px;min-height:32px;display:flex;align-items:center}
+.tw-how p,.tw-how li{font-size:15px;line-height:1.55;margin:6px 0}
+.tw-how table{border-collapse:collapse;width:100%;font-size:14px;margin:6px 0}
+.tw-how td,.tw-how th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.tw-foot{font-size:13px;color:var(--ink-soft);margin-top:12px;line-height:1.5}
+.tw-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13.5px;color:var(--ink-soft);margin-top:6px}
+.tw-legend b{display:inline-block;width:14px;height:0;border-top:3px solid;vertical-align:middle;margin-right:5px}
+@media(max-width:720px){.tw-guide,.tw-grid{grid-template-columns:1fr}.tw-tier{font-size:26px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body style="background:var(--paper)">
+<div class="tw-wrap">
+
+<div class="tw-ribbon"><b>Design prototype.</b> The sugar history is real data from an anonymised dataset patient. The forecast numbers here are illustrative; the trained model plugs in later.</div>
+
+<div class="tw-screen-title">Screen 1: the demo copy's login page</div>
+<div class="auth-shell" style="margin:0 auto;max-width:420px">
+  <div class="auth-brand"><span class="brand-mark" aria-hidden="true"></span>SmartPoli</div>
+  <p class="auth-tagline">Turn a confusing prescription into an understandable treatment journey.</p>
+  <div class="card tw-demo-card">
+    <h2>Doctor demo</h2>
+    <p>See the Digital Twin on two anonymised patients. No sign-up needed.</p>
+    <button class="primary" style="width:100%" onclick="document.getElementById('toast').textContent='In the real page this signs in as the demo doctor and opens the patient list.'">Open the doctor demo</button>
+    <div class="tw-cred"><div><span>Email</span><code>doctor@smartpoli.demo</code></div><button class="ghost small" onclick="copy('doctor@smartpoli.demo',this)">Copy</button></div>
+    <div class="tw-cred"><div><span>Password</span><code>demo1234</code></div><button class="ghost small" onclick="copy('demo1234',this)">Copy</button></div>
+    <div id="toast" class="tw-foot" role="status"></div>
+  </div>
+  <div class="card"><details><summary style="cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center">Log in with another account</summary><p class="tw-foot">The usual email and password form goes here.</p></details></div>
+  <p class="tw-foot">This copy replays anonymised public research data. It is not for medical decisions.</p>
+</div>
+
+<div class="tw-screen-title">Screen 2: Twin tab on the doctor dashboard</div>
+
+<div class="tw-tabs" role="tablist" aria-label="Demo patients">
+  <button class="primary" role="tab" aria-selected="true">Demo patient A</button>
+  <button class="ghost" role="tab" disabled title="Added in the build: heart-rate demo">Demo patient B (with heart rate)</button>
+</div>
+
+<div class="card">
+  <div class="tw-row" style="justify-content:space-between">
+    <div>
+      <h2 style="margin:0 0 6px;font-size:20px">Demo patient A: woman, 74</h2>
+      <div class="tw-row"><span class="tw-chip">Type 2 diabetes, 15 years</span><span class="tw-chip">Insulin</span><span class="tw-chip heart">Coronary heart disease</span><span class="tw-chip">HbA1c 92 mmol/mol</span></div>
+    </div>
+    <span class="badge" style="background:var(--blue-soft);color:#1b4aa0">Replay of anonymised dataset patient</span>
+  </div>
+</div>
+
+<div class="card" id="guide">
+  <div class="tw-row" style="justify-content:space-between;margin-bottom:10px"><b style="font-size:16px">Read this screen in three steps</b><button class="ghost small" id="hideGuide">Hide</button></div>
+  <div class="tw-guide">
+    <div><span class="tw-n">1</span><span>The <b>black line</b> is the patient's sugar so far, read from the sensor.</span></div>
+    <div><span class="tw-n">2</span><span>The <b>green band</b> is where the model expects sugar over the next 2 hours. Real values land inside it about 8 times in 10.</span></div>
+    <div><span class="tw-n">3</span><span>The <b>two cards</b> below say what to watch for. Tap <b>Why?</b> to see what drove each one.</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <svg id="chart" class="tw-chart" viewBox="0 0 900 330" role="img" aria-label="Sugar history and two-hour forecast"></svg>
+  <div class="tw-legend"><span><b style="border-color:#16241F"></b>Sugar so far</span><span><b style="border-color:#12876F;border-top-style:dashed"></b>Forecast</span><span><b style="border-color:#DFF1EA;border-top-width:9px"></b>Likely range (80%)</span><span style="color:#2E6FE0">&#9650; Insulin</span><span style="color:#B4791F">&#9679; Meal</span></div>
+  <div class="tw-controls">
+    <button class="primary small" id="play" aria-label="Play or pause the replay">Play replay</button>
+    <input type="range" id="scrub" min="420" max="660" step="15" value="592" aria-label="Replay time">
+    <label style="display:flex;gap:6px;align-items:center;font-size:14px"><input type="checkbox" id="truth"> Show what really happened</label>
+  </div>
+</div>
+
+<div id="heartNote"></div>
+
+<div class="tw-grid">
+  <div class="card">
+    <div style="font-weight:600">Low sugar in the next hour</div>
+    <div class="tw-tier" id="lowTier"></div>
+    <p class="tw-sub" id="lowText"></p>
+    <details class="tw-why"><summary>Why?</summary><div id="lowWhy"></div><p class="tw-foot">Rule: alert when the lowest forecast in the next hour is at or under 100 mg/dL for this patient (heart disease), watch up to 120. Other patients: 90 and 110.</p></details>
+  </div>
+  <div class="card">
+    <div style="font-weight:600">High sugar in the next 2 hours</div>
+    <div class="tw-tier" id="highTier"></div>
+    <p class="tw-sub" id="highText"></p>
+    <details class="tw-why"><summary>Why?</summary><div id="highWhy"></div></details>
+  </div>
+</div>
+
+<div class="card tw-how">
+  <b style="font-size:16px">How this model works</b>
+  <details><summary>What it looks at</summary>
+    <p>Every 15 minutes it looks at the sugar so far: the current value, how fast it is changing, and the lowest and highest in the last hour. It also looks at when the last meal and insulin dose were, the time of day, and facts about the patient such as age, diabetes drugs and kidney function.</p></details>
+  <details><summary>What it predicts</summary>
+    <p>Sugar over the next 2 hours with a likely range, and the chance of a low or a high. Low sugar is shown as a level (calm, watch, alert) because real lows are rare and a single percentage would suggest more precision than we have.</p></details>
+  <details><summary>How it was checked</summary>
+    <p>It learned from other patients and was scored on patients it had never seen. Results so far, on development patients (the final locked test comes last):</p>
+    <table><tr><th>Minutes ahead</th><th>Typical error, this model</th><th>"Stays the same"</th></tr>
+      <tr><td>15</td><td>5.3 mg/dL</td><td>6.5 mg/dL</td></tr><tr><td>60</td><td>17.2 mg/dL</td><td>20.0 mg/dL</td></tr><tr><td>120</td><td>25.5 mg/dL</td><td>30.8 mg/dL</td></tr></table>
+    <p>For lows, the forecast warned about 85 to 100 of every 100 low events at 1 to 2 alerts per patient per day (66 events, 24 patients).</p></details>
+  <details><summary>What it cannot do</summary>
+    <ul><li>It is a risk flag for the doctor, not a diagnosis or a treatment change.</li>
+    <li>It learned from 100 patients in one Chinese hospital, so it may be less accurate for others.</li>
+    <li>A sensor that reads too low can create false alarms. The model corrects for each patient's usual offset when it learns.</li>
+    <li>Missed doses are shown on the timeline, but how well the model reacts to them is untested.</li></ul></details>
+</div>
+
+<p class="tw-foot">Model demo-0.1. Trained on the ShanghaiT2DM dataset (Zhao et al., Scientific Data 2023). Risk flag for the doctor, not a diagnosis.</p>
+</div>
+
+<script>
+var D={"pts": [[187, 156.6], [202, 156.6], [217, 156.6], [232, 158.4], [247, 153.0], [262, 145.8], [277, 144.0], [292, 142.2], [307, 147.6], [322, 151.2], [337, 151.2], [352, 158.4], [367, 162.0], [382, 163.8], [397, 167.4], [412, 169.2], [427, 172.8], [442, 178.2], [457, 183.6], [472, 185.4], [487, 190.8], [502, 194.4], [517, 203.4], [532, 212.4], [547, 203.4], [562, 178.2], [577, 153.0], [592, 126.0], [607, 97.2], [622, 75.6], [637, 61.2], [652, 55.8], [667, 61.2], [682, 75.6], [697, 77.4], [712, 75.6], [727, 68.4], [742, 64.8], [757, 68.4], [772, 75.6], [787, 81.0], [802, 88.2]], "ev": [["meal", 412, "Cereal 100 g and more"], ["insulin", 412, "insulin glargine, 14 IU, Humulin 70/30, 12 IU"], ["meal", 637, "Water bamboo 60 g and more"], ["insulin", 637, "Humulin 70/30, 3 IU"]]};
+var HEART=true,T0=240,T1=720,VW=900,VH=330,L=48,R=16,TOP=14,CH=230;
+var state={now:592,playing:false,truth:false};
+function fmt(m){var h=Math.floor(m/60),mm=m%60;return (h<10?'0':'')+h+':'+(mm<10?'0':'')+mm}
+function X(m){return L+(m-T0)/(T1-T0)*(VW-L-R)}
+function Y(v){return TOP+CH-(v-40)/(240-40)*CH}
+function at(m){var best=null;for(var i=0;i<D.pts.length;i++){if(D.pts[i][0]<=m)best=D.pts[i][1]}return best}
+function copy(t,b){try{navigator.clipboard.writeText(t)}catch(e){}var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)}
+function forecast(now){var v=at(now),v30=at(now-30),tr=(v-v30)/2,out=[],s=0,half={15:8,30:15,60:25,120:37};
+for(var k=1;k<=8;k++){s+=Math.pow(0.8,k);var h=k*15,hw;if(h<=15)hw=half[15];else if(h<=30)hw=half[15]+(h-15)/15*(half[30]-half[15]);else if(h<=60)hw=half[30]+(h-30)/30*(half[60]-half[30]);else hw=half[60]+(h-60)/60*(half[120]-half[60]);var p=v+tr*s;out.push({m:now+h,h:h,p:p,lo:p-hw,hi:p+hw})}return out}
+function sinceEv(kind,now){var best=null;D.ev.forEach(function(e){if(e[0]==kind&&e[1]<=now&&(best==null||e[1]>best[1]))best=e});return best}
+function draw(){var el=document.getElementById('chart');VW=Math.max(330,Math.min(900,el.parentNode.clientWidth-32));el.setAttribute('viewBox','0 0 '+VW+' 330');var now=state.now,v=at(now),f=forecast(now),s='';
+s+='<rect x="'+L+'" y="'+Y(70)+'" width="'+(VW-L-R)+'" height="'+(Y(40)-Y(70))+'" fill="#FBE2DD" opacity=".55"/>';
+s+='<rect x="'+L+'" y="'+Y(240)+'" width="'+(VW-L-R)+'" height="'+(Y(180)-Y(240))+'" fill="#FBEBD3" opacity=".55"/>';
+[70,120,180].forEach(function(g){s+='<line x1="'+L+'" x2="'+(VW-R)+'" y1="'+Y(g)+'" y2="'+Y(g)+'" stroke="#8B9A94" stroke-dasharray="4 4" stroke-width="1"/><text x="'+(L-8)+'" y="'+(Y(g)+4)+'" text-anchor="end" font-size="12" fill="#5C6E68">'+g+'</text>'});
+for(var m=300;m<=720;m+=(VW<600?120:60)){s+='<text x="'+X(m)+'" y="'+(TOP+CH+18)+'" text-anchor="middle" font-size="12" fill="#5C6E68">'+fmt(m)+'</text>'}
+var up=f.map(function(q){return X(q.m)+','+Y(Math.min(240,q.hi))}),dn=f.slice().reverse().map(function(q){return X(q.m)+','+Y(Math.max(40,q.lo))});
+s+='<polygon points="'+X(now)+','+Y(v)+' '+up.join(' ')+' '+dn.join(' ')+'" fill="#DFF1EA" opacity=".95"/>';
+s+='<polyline fill="none" stroke="#12876F" stroke-width="2.5" stroke-dasharray="6 5" points="'+X(now)+','+Y(v)+' '+f.map(function(q){return X(q.m)+','+Y(q.p)}).join(' ')+'"/>';
+if(state.truth){var tp=D.pts.filter(function(p){return p[0]>=now&&p[0]<=now+120});s+='<polyline fill="none" stroke="#16241F" stroke-width="2" stroke-dasharray="2 4" opacity=".7" points="'+tp.map(function(p){return X(p[0])+','+Y(p[1])}).join(' ')+'"/>'}
+var hp=D.pts.filter(function(p){return p[0]>=T0&&p[0]<=now});s+='<polyline fill="none" stroke="#16241F" stroke-width="3" stroke-linejoin="round" points="'+hp.map(function(p){return X(p[0])+','+Y(p[1])}).join(' ')+'"/>';
+s+='<line x1="'+X(now)+'" x2="'+X(now)+'" y1="'+TOP+'" y2="'+(TOP+CH)+'" stroke="#12876F" stroke-width="1.5"/><circle cx="'+X(now)+'" cy="'+Y(v)+'" r="5" fill="#16241F"/><text x="'+X(now)+'" y="'+(TOP+11)+'" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0C6455">now '+fmt(now)+'</text>';
+var lane=TOP+CH+40;s+='<text x="'+(L-8)+'" y="'+(lane+4)+'" text-anchor="end" font-size="12" fill="#5C6E68">doses</text><line x1="'+L+'" x2="'+(VW-R)+'" y1="'+lane+'" y2="'+lane+'" stroke="#E3EBE7"/>';
+D.ev.forEach(function(e){if(e[1]<T0||e[1]>T1)return;var x=X(e[1]);if(e[0]=='insulin')s+='<path d="M'+x+' '+(lane-9)+' l8 14 h-16z" fill="#2E6FE0" opacity="'+(e[1]<=now?1:.35)+'"/>';else s+='<circle cx="'+x+'" cy="'+(lane+14)+'" r="7" fill="#B4791F" opacity="'+(e[1]<=now?1:.35)+'"/>'});
+var c1=hp.length>6?hp[hp.length-7]:hp[0];s+=callout(X(c1[0]),Y(c1[1])-22,'1');s+=callout(X(now+60),Y(f[3].hi)-20,'2');
+document.getElementById('chart').innerHTML=s}
+function callout(x,y,n){return '<g><circle cx="'+x+'" cy="'+y+'" r="11" fill="#12876F"/><text x="'+x+'" y="'+(y+4.5)+'" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">'+n+'</text></g>'}
+function reasonsHTML(list){return list.map(function(r){return '<div class="tw-reason"><span>'+r.t+'</span><span class="tw-bar" title="'+(r.up?'raises':'lowers')+' the risk"><i style="width:'+Math.max(8,Math.min(100,r.w))+'%;background:'+(r.up?'#D3402A':'#12876F')+'"></i></span></div>'}).join('')+'<p class="tw-foot">Red raises the risk, green lowers it. Longer bar means a bigger push.</p>'}
+function update(){var now=state.now,v=at(now),v30=at(now-30),ch=v-v30,f=forecast(now),ins=sinceEv('insulin',now),meal=sinceEv('meal',now);
+var lowest=f.slice(0,4).reduce(function(a,b){return b.p<a.p?b:a}),alertT=HEART?100:90,watchT=alertT+20,tier=lowest.p<=alertT?'alert':(lowest.p<=watchT?'watch':'calm');
+var lt=document.getElementById('lowTier');lt.textContent={calm:'Calm',watch:'Watch',alert:'Alert'}[tier];lt.className='tw-tier '+tier;
+document.getElementById('lowText').textContent=tier=='calm'?'No low is expected in the next hour. Sugar is '+Math.round(v)+' mg/dL.':'Sugar is '+Math.round(v)+' mg/dL and is expected to reach about '+Math.round(lowest.p)+' mg/dL in about '+lowest.h+' minutes.';
+var rs=[];if(ch<-6)rs.push({t:'Sugar fell '+Math.round(-ch)+' mg/dL in the last 30 minutes',up:true,w:Math.min(100,-ch*3)});else if(ch>6)rs.push({t:'Sugar rose '+Math.round(ch)+' mg/dL in the last 30 minutes',up:false,w:Math.min(100,ch*3)});
+if(v<140)rs.push({t:'Sugar is already down at '+Math.round(v)+' mg/dL',up:true,w:Math.min(100,(140-v)*1.2)});
+if(ins&&now-ins[1]<=300)rs.push({t:'Insulin ('+ins[2].split(',').slice(-2).join(',').trim()+') given '+(now-ins[1])+' minutes ago',up:true,w:Math.max(15,70-(now-ins[1])/5)});
+if(meal&&now-meal[1]<=120)rs.push({t:'A meal was logged '+(now-meal[1])+' minutes ago, which pushes sugar up',up:false,w:Math.max(15,60-(now-meal[1])/2)});
+if(!rs.length)rs.push({t:'Sugar is steady and well above the low range',up:false,w:30});
+document.getElementById('lowWhy').innerHTML=reasonsHTML(rs);
+var mx=Math.max(f[3].p,f[7].p),p=Math.round(100/(1+Math.exp(-(mx-190)/22))),ht=p<15?'calm':(p<40?'watch':'alert');
+var hi=document.getElementById('highTier');hi.textContent={calm:'Low chance',watch:'Moderate chance',alert:'High chance'}[ht];hi.className='tw-tier '+ht;
+document.getElementById('highText').textContent='About '+p+' in 100 chance of going above 180 mg/dL in the next 2 hours.';
+var hr=[];hr.push({t:'Forecast peaks near '+Math.round(mx)+' mg/dL',up:mx>180,w:Math.min(100,Math.abs(mx-150))});if(meal&&now-meal[1]<=150)hr.push({t:'A meal was logged '+(now-meal[1])+' minutes ago',up:true,w:50});if(ch<-6)hr.push({t:'Sugar is falling, which lowers the chance of a high',up:false,w:Math.min(100,-ch*3)});
+document.getElementById('highWhy').innerHTML=reasonsHTML(hr);
+document.getElementById('heartNote').innerHTML=(HEART&&tier!='calm')?'<div class="tw-heart"><b>Heart note.</b> This patient has coronary heart disease. Low sugar is linked to heart strain, so this low alert deserves a quick look. <span style="color:#7a5416">Source: large diabetes trials (ADVANCE, ACCORD, VADT) link severe lows to heart events.</span></div>':'';
+document.getElementById('scrub').value=now;draw()}
+var timer=null;function toggle(){state.playing=!state.playing;document.getElementById('play').textContent=state.playing?'Pause replay':'Play replay';clearInterval(timer);if(state.playing){timer=setInterval(function(){if(state.now>=660){state.now=420}else state.now+=15;update()},900)}}
+document.getElementById('play').onclick=toggle;
+window.addEventListener('resize',draw);document.getElementById('scrub').oninput=function(){state.now=+this.value;update()};
+document.getElementById('truth').onchange=function(){state.truth=this.checked;draw()};
+try{if(localStorage.getItem('twGuideHidden')==='1')document.getElementById('guide').style.display='none'}catch(e){}
+document.getElementById('hideGuide').onclick=function(){document.getElementById('guide').style.display='none';try{localStorage.setItem('twGuideHidden','1')}catch(e){}};
+update();
+</script>
+</body>
+</html>

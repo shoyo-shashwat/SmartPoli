@@ -1,0 +1,5 @@
+# Datasets: never commit (decision 25). Download scripts and READMEs only.
+data/
+.venv/
+.ipynb_checkpoints/
+__pycache__/

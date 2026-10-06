@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option A: Briefing (answer first)</title>
+<link rel="stylesheet" href="../../../backend/static/style.css"><link rel="stylesheet" href="twin_common.css">
+<style>
+.a-hero{border-left:8px solid var(--teal);padding:18px 18px 16px}
+.a-hero h1{font-size:28px;line-height:1.2;margin:4px 0 6px}
+.a-pills{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.a-pill{font-size:14px;padding:6px 12px;border-radius:999px;background:var(--paper);border:1px solid var(--line)}
+.a-pill.up{background:var(--alarm-soft);border-color:var(--alarm-soft);color:#7a2616}.a-pill.down{background:var(--teal-soft);border-color:var(--teal-soft);color:var(--teal-dark)}
+.a-spark{width:100%;max-width:420px;height:64px;display:block;margin-top:12px}
+.a-tl{list-style:none;margin:0;padding:0}.a-tl li{display:grid;grid-template-columns:54px 1fr;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:15px}
+</style></head>
+<body style="background:var(--paper)">
+<div class="tw-wrap">
+<div class="tw-ribbon"><b>Option A: Briefing.</b> The answer comes first as one sentence. The curve is only a small sparkline; the rest of the screen is about what to do next. Forecast numbers are illustrative. <a href="index.html">All options</a></div>
+<div class="tw-top"><div><h2 style="margin:0 0 6px;font-size:20px">Demo patient A: woman, 74</h2><div class="tw-row"><span class="tw-chip">Type 2 diabetes</span><span class="tw-chip">Insulin</span><span class="tw-chip heart">Coronary heart disease</span><span class="tw-chip">Replay of anonymised dataset patient</span></div></div></div>
+
+<div class="card a-hero" id="hero"><div style="font-weight:600;color:var(--ink-soft)" id="aTime"></div><h1 id="aHead"></h1><p class="tw-sub" id="aSub"></p><div class="a-pills" id="aPills"></div><svg id="spark" class="a-spark" role="img" aria-label="Sugar over the last three hours and the forecast"></svg></div>
+<div id="heartNote"></div>
+<div class="card"><b style="font-size:17px">Your next step</b><div id="after" style="margin-top:8px"></div></div>
+<div class="tw-grid"><div class="card"><div style="font-weight:600">High sugar in the next 2 hours</div><div class="tw-tier" id="hiTier"></div><p class="tw-sub" id="hiText"></p><details class="tw-why"><summary>Why?</summary><div id="hiWhy"></div></details></div>
+<div class="card"><div style="font-weight:600">Why the low alert?</div><div id="lowWhy" style="margin-top:6px"></div></div></div>
+<div class="card" id="timeline"><b style="font-size:17px">Medicine timeline</b><ul class="a-tl" id="tl" style="margin-top:6px"></ul></div>
+<div class="card"><b style="font-size:17px">Activity</b><div id="log" style="margin-top:6px"></div></div>
+<div class="card"><div class="tw-controls"><button class="primary small" id="play">Play replay</button><input type="range" id="scrub" min="420" max="660" step="15" value="592" aria-label="Replay time"><span class="tw-sub" style="margin:0">Replay of 10 Nov 2020</span></div></div>
+<div class="card tw-how"><b style="font-size:17px">How this works</b>
+<details><summary>What the twin looks at</summary><p>Every 15 minutes: the sugar so far and how fast it is changing, when the last meal and insulin were, the time of day, and facts about the patient such as age and diabetes drugs.</p></details>
+<details><summary>How well it works</summary><p>Checked on patients it had never seen. Sugar forecasts were off by about 5 mg/dL at 15 minutes and 17 mg/dL at 60 minutes, better than assuming sugar stays the same (6.5 and 20.0). The low alert warned about 85 to 100 of every 100 lows at 1 to 2 alerts a day (development results; the final test comes last).</p></details>
+<details><summary>What it cannot do</summary><ul><li>It is a risk flag, not a diagnosis.</li><li>It learned from 100 patients in one hospital.</li><li>Sensor errors can cause false alarms.</li><li>How it reacts to missed doses is untested.</li></ul></details></div>
+<p class="tw-foot">Model demo-0.1. Trained on ShanghaiT2DM (Zhao et al., 2023). Risk flag for the doctor, not a diagnosis.</p>
+</div>
+<script src="twin_common.js"></script>
+<script>
+var C={calm:'#12876F',watch:'#B4791F',alert:'#D3402A'};
+function spark(c){var n=c.now,pts=TW.D.pts.filter(function(p){return p[0]>=n-180&&p[0]<=n}),W=420,H=64,x=function(m){return 4+(m-(n-180))/(300)*(W-8)},y=function(v){return H-4-(Math.max(40,Math.min(240,v))-40)/200*(H-8)};
+var s='<line x1="4" x2="'+(W-4)+'" y1="'+y(70)+'" y2="'+y(70)+'" stroke="#D3402A" stroke-dasharray="3 3" opacity=".5"/>';
+s+='<polyline fill="none" stroke="#16241F" stroke-width="2.5" points="'+pts.map(function(p){return x(p[0])+','+y(p[1])}).join(' ')+'"/>';
+s+='<polyline fill="none" stroke="#12876F" stroke-width="2.5" stroke-dasharray="5 4" points="'+x(n)+','+y(c.v)+' '+c.f.map(function(q){return x(q.m)+','+y(q.p)}).join(' ')+'"/><circle cx="'+x(n)+'" cy="'+y(c.v)+'" r="4" fill="#16241F"/>';
+document.getElementById('spark').setAttribute('viewBox','0 0 '+W+' '+H);document.getElementById('spark').innerHTML=s}
+function render(){var c=TW.compute(TW.state.now);document.getElementById('hero').style.borderLeftColor=C[c.tier];
+document.getElementById('aTime').textContent='10 Nov 2020, '+TW.fmt(c.now);document.getElementById('aHead').textContent=c.headline;document.getElementById('aHead').style.color=C[c.tier];document.getElementById('aSub').textContent=c.headSub;
+document.getElementById('aPills').innerHTML=c.lowReasons.slice(0,3).map(function(r){return '<span class="a-pill '+(r.up?'up':'down')+'">'+r.t+'</span>'}).join('');
+spark(c);document.getElementById('heartNote').innerHTML=c.heart?'<div class="tw-heart"><b>Heart note.</b> This patient has coronary heart disease. Low sugar is linked to heart strain, so this alert deserves a quick look.</div>':'';
+document.getElementById('after').innerHTML=TW.afterHTML(c);document.getElementById('hiTier').textContent={calm:'Low chance',watch:'Moderate chance',alert:'High chance'}[c.highTier];document.getElementById('hiTier').className='tw-tier '+c.highTier;document.getElementById('hiText').textContent=c.highText;
+document.getElementById('hiWhy').innerHTML=TW.reasonsHTML([{t:'Forecast peaks near '+Math.round(Math.max(c.f[3].p,c.f[7].p))+' mg/dL',up:c.highP>=15,w:50}]);document.getElementById('lowWhy').innerHTML=TW.reasonsHTML(c.lowReasons);
+var items=[];TW.D.ev.forEach(function(e){if(e[1]<=c.now&&e[1]>=c.now-480)items.push(e)});document.getElementById('tl').innerHTML=items.length?items.slice().reverse().map(function(e){return '<li><b>'+TW.fmt(e[1])+'</b><span>'+(e[0]=='insulin'?'Insulin: '+e[2]:'Meal: '+e[2])+'</span></li>'}).join(''):'<li><span></span><span>No doses or meals in the last 8 hours.</span></li>';
+document.getElementById('log').innerHTML=TW.logHTML();document.getElementById('scrub').value=c.now}
+TW.setOnChange(render);TW.bind();
+document.getElementById('play').onclick=function(){TW.play(this,render)};document.getElementById('scrub').oninput=function(){TW.state.now=+this.value;TW.state.reviewed=false;TW.state.snooze=false;render()};render();
+</script></body></html>

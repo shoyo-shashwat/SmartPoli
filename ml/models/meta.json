@@ -1,0 +1,110 @@
+{
+ "features": [
+  "cgm_now",
+  "cgm_change_30",
+  "cgm_change_60",
+  "cgm_std_1h",
+  "cgm_min_1h",
+  "cgm_max_1h",
+  "hour_sin",
+  "hour_cos",
+  "min_since_meal",
+  "min_since_insulin",
+  "min_since_oral",
+  "last_insulin_iu",
+  "age",
+  "bmi",
+  "diabetes_years",
+  "hba1c",
+  "egfr",
+  "sex",
+  "hypertension",
+  "on_insulin",
+  "on_sulfonylurea",
+  "on_metformin"
+ ],
+ "test_patients": [
+  2001,
+  2008,
+  2011,
+  2016,
+  2032,
+  2037,
+  2038,
+  2041,
+  2042,
+  2052,
+  2060,
+  2061,
+  2063,
+  2066,
+  2069,
+  2073,
+  2076,
+  2081,
+  2091,
+  2094,
+  2099
+ ],
+ "models": {
+  "spike120": {
+   "trees": 102,
+   "cv_best_iterations": [
+    156,
+    113,
+    78,
+    102,
+    70
+   ]
+  },
+  "large_rise120": {
+   "trees": 98,
+   "cv_best_iterations": [
+    73,
+    116,
+    101,
+    98,
+    64
+   ]
+  },
+  "forecast_15_mean": {
+   "trees": 341
+  },
+  "forecast_15_q10": {
+   "trees": 670
+  },
+  "forecast_15_q90": {
+   "trees": 995
+  },
+  "forecast_30_mean": {
+   "trees": 168
+  },
+  "forecast_30_q10": {
+   "trees": 534
+  },
+  "forecast_30_q90": {
+   "trees": 536
+  },
+  "forecast_60_mean": {
+   "trees": 136
+  },
+  "forecast_60_q10": {
+   "trees": 468
+  },
+  "forecast_60_q90": {
+   "trees": 485
+  },
+  "forecast_120_mean": {
+   "trees": 116
+  },
+  "forecast_120_q10": {
+   "trees": 348
+  },
+  "forecast_120_q90": {
+   "trees": 362
+  },
+  "low60_constrained": {
+   "trees": 88
+  }
+ }
+}

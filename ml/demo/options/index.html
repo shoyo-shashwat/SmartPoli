@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Twin tab: design options</title>
+<link rel="stylesheet" href="../../../backend/static/style.css"><link rel="stylesheet" href="twin_common.css">
+<style>.o-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.o-grid .card{display:flex;flex-direction:column;gap:6px}.o-grid a.primary{margin-top:auto;text-align:center;text-decoration:none;display:block;padding:10px 12px;border-radius:var(--radius-sm)}@media(max-width:900px){.o-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.o-grid{grid-template-columns:1fr}}</style></head>
+<body style="background:var(--paper)"><div class="tw-wrap">
+<h1 style="font-size:24px;margin:8px 0 4px">Twin tab: four ways to show the same model</h1>
+<p class="tw-sub">Every option has the same demo patient, the same replay slider and the same "what happens next" actions (note, medicine timeline, report, mark as reviewed, snooze) with an activity log. Only the way the forecast is shown differs. Try the replay slider to move from calm to watch to alert.</p>
+<div class="o-grid">
+<div class="card"><b>1. Chart (first prototype)</b><p class="tw-sub" style="margin:0">Line chart with a forecast band. Most precise, but the doctor has to interpret a curve.</p><p class="tw-foot" style="margin:0">Best for: a second look, or a cardiologist or diabetologist who reads CGM curves daily.</p><a class="primary" href="../twin_demo_prototype.html">Open</a></div>
+<div class="card"><b>2. Briefing (A)</b><p class="tw-sub" style="margin:0">One sentence answer first, three reason pills, a tiny sparkline, then what to do.</p><p class="tw-foot" style="margin:0">Best for: understanding in five seconds on a phone.</p><a class="primary" href="option_a_briefing.html">Open</a></div>
+<div class="card"><b>3. Next two hours (B)</b><p class="tw-sub" style="margin:0">Eight colour blocks for the next 2 hours plus a short story of how we got here. No curve.</p><p class="tw-foot" style="margin:0">Best for: seeing when the risk starts, at a glance.</p><a class="primary" href="option_b_strip.html">Open</a></div>
+<div class="card"><b>4. Worklist (C)</b><p class="tw-sub" style="margin:0">A list of patients sorted by urgency with a detail panel for the selected one.</p><p class="tw-foot" style="margin:0">Best for: a doctor with many patients; shows the twin working as a triage tool.</p><a class="primary" href="option_c_worklist.html">Open</a></div>
+</div>
+<div class="card" style="margin-top:16px"><b style="font-size:17px">Recommendation</b>
+<p class="tw-sub" style="margin-top:6px">Combine them. Open on the worklist (C), because a doctor's real question is "who needs me now". The selected patient opens as the briefing (A): a one-sentence answer, the two-hour strip (B), then the next-step actions. Put the line chart behind a "Show the curve" button for the doctors who want the detail. This gives a first-time viewer the answer in seconds and still lets an expert check the model.</p></div>
+</div></body></html>

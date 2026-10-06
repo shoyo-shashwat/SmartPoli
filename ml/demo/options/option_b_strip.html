@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option B: Next two hours strip</title>
+<link rel="stylesheet" href="../../../backend/static/style.css"><link rel="stylesheet" href="twin_common.css">
+<style>
+.b-strip{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:12px 0 8px}
+.b-cell{border-radius:var(--radius-sm);padding:10px 4px;text-align:center;border:1.5px solid transparent}
+.b-cell b{display:block;font-size:20px;line-height:1.1}.b-cell span{display:block;font-size:12.5px;margin-top:3px;opacity:.85}
+.b-cell.calm{background:var(--teal-soft);color:var(--teal-dark)}.b-cell.watch{background:var(--amber-soft);color:#6a4410}.b-cell.alert{background:var(--alarm-soft);color:#7a2616;border-color:var(--alarm)}.b-cell.high{background:var(--blue-soft);color:#1b4aa0}
+.b-key{display:flex;gap:14px;flex-wrap:wrap;font-size:13.5px;color:var(--ink-soft)}.b-key i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.b-story{list-style:none;margin:0;padding:0 0 0 14px;border-left:3px solid var(--line)}
+.b-story li{position:relative;padding:6px 0 10px 14px;font-size:15px;line-height:1.45}
+.b-story li::before{content:"";position:absolute;left:-23px;top:11px;width:12px;height:12px;border-radius:50%;background:var(--ink-faint);border:2px solid var(--paper)}
+.b-story li.ins::before{background:var(--blue)}.b-story li.meal::before{background:var(--amber)}.b-story li.now::before{background:var(--teal);width:16px;height:16px;left:-25px;top:9px}
+.b-story small{display:block;color:var(--ink-soft);font-size:13px}
+.b-how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}.b-how div{font-size:15px;line-height:1.5}.b-how b{display:block;margin-bottom:2px}
+@media(max-width:720px){.b-strip{grid-template-columns:repeat(4,1fr)}.b-how{grid-template-columns:1fr}}
+</style></head>
+<body style="background:var(--paper)">
+<div class="tw-wrap">
+<div class="tw-ribbon"><b>Option B: Next two hours.</b> No line chart. The next 2 hours are eight colour-coded 15-minute blocks, and a short story explains how we got here. Forecast numbers are illustrative. <a href="index.html">All options</a></div>
+<div class="tw-top"><div><h2 style="margin:0 0 6px;font-size:20px">Demo patient A: woman, 74</h2><div class="tw-row"><span class="tw-chip">Type 2 diabetes</span><span class="tw-chip">Insulin</span><span class="tw-chip heart">Coronary heart disease</span><span class="tw-chip">Replay of anonymised dataset patient</span></div></div><div class="tw-controls"><button class="primary small" id="play">Play replay</button><input type="range" id="scrub" min="420" max="660" step="15" value="592" aria-label="Replay time"></div></div>
+
+<div class="card"><div class="tw-row" style="justify-content:space-between"><b style="font-size:17px">The next 2 hours, from <span id="bNow"></span></b><span class="tw-chip" id="bHead"></span></div>
+<div class="b-strip" id="strip"></div>
+<div class="b-key"><span><i style="background:var(--teal-soft)"></i>Calm</span><span><i style="background:var(--amber-soft)"></i>Watch: forecast under 120</span><span><i style="background:var(--alarm-soft);border:1px solid var(--alarm)"></i>Alert: forecast at or under 100</span><span><i style="background:var(--blue-soft)"></i>High: over 180</span></div>
+<p class="tw-sub" style="margin-top:10px" id="bSub"></p><p class="tw-foot" style="margin-top:0">Each block shows the expected sugar in mg/dL. Real values land within about 25 mg/dL of it at one hour.</p></div>
+<div id="heartNote"></div>
+<div class="tw-grid"><div class="card"><b style="font-size:17px">How we got here</b><ul class="b-story" id="story" style="margin-top:10px"></ul></div>
+<div class="card"><b style="font-size:17px">Your next step</b><div id="after" style="margin-top:8px"></div></div></div>
+<div class="card" id="timeline"><b style="font-size:17px">Why the forecast looks like this</b><div id="why" style="margin-top:6px"></div><p class="tw-sub" id="hi" style="margin-top:10px"></p></div>
+<div class="card"><b style="font-size:17px">Activity</b><div id="log" style="margin-top:6px"></div></div>
+<div class="card"><b style="font-size:17px">How this works</b><div class="b-how"><div><b>It sees</b>Sugar so far, how fast it moves, meals, insulin, time of day, and facts about the patient.</div><div><b>It predicts</b>Sugar for the next 2 hours, and how likely a low or a high is.</div><div><b>It was checked</b>On patients it never saw: forecast error 5 mg/dL at 15 minutes, 17 at 60. Not a diagnosis; one hospital's patients; sensor errors can cause false alarms.</div></div></div>
+<p class="tw-foot">Model demo-0.1. Trained on ShanghaiT2DM (Zhao et al., 2023). Risk flag for the doctor, not a diagnosis.</p>
+</div>
+<script src="twin_common.js"></script>
+<script>
+function render(){var c=TW.compute(TW.state.now),lab={calm:'Calm',watch:'Watch',alert:'Alert'};document.getElementById('bNow').textContent=TW.fmt(c.now);
+var h=document.getElementById('bHead');h.textContent=c.headline;h.className='tw-chip '+(c.tier=='alert'?'':(c.tier=='watch'?'heart':'reviewed'));
+document.getElementById('strip').innerHTML=c.cells.map(function(x){return '<div class="b-cell '+x.tier+'"><b>'+Math.round(x.p)+'</b><span>+'+x.h+' min</span><span>'+TW.fmt(c.now+x.h)+'</span></div>'}).join('');
+document.getElementById('bSub').textContent=c.headSub;
+document.getElementById('heartNote').innerHTML=c.heart?'<div class="tw-heart"><b>Heart note.</b> This patient has coronary heart disease. Low sugar is linked to heart strain, so this alert deserves a quick look.</div>':'';
+var items=[];TW.D.ev.forEach(function(e){if(e[1]<=c.now&&e[1]>=c.now-480)items.push({m:e[1],k:e[0]=='insulin'?'ins':'meal',t:(e[0]=='insulin'?'Insulin given':'Meal logged'),s:e[2]})});
+var past=TW.D.pts.filter(function(p){return p[0]<=c.now&&p[0]>=c.now-180}),pk=past.reduce(function(a,b){return b[1]>a[1]?b:a},past[0]);if(pk&&pk[1]-c.v>25)items.push({m:pk[0],k:'',t:'Sugar peaked at '+Math.round(pk[1])+' mg/dL',s:''});
+items.push({m:c.now,k:'now',t:'Now: '+Math.round(c.v)+' mg/dL',s:c.ch<-6?'down '+Math.round(-c.ch)+' in the last 30 minutes':(c.ch>6?'up '+Math.round(c.ch)+' in the last 30 minutes':'steady')});
+items.sort(function(a,b){return b.m-a.m});document.getElementById('story').innerHTML=items.map(function(i){return '<li class="'+i.k+'"><b>'+TW.fmt(i.m)+'</b> '+i.t+(i.s?'<small>'+i.s+'</small>':'')+'</li>'}).join('');
+document.getElementById('after').innerHTML=TW.afterHTML(c);document.getElementById('why').innerHTML=TW.reasonsHTML(c.lowReasons);document.getElementById('hi').textContent=c.highText;document.getElementById('log').innerHTML=TW.logHTML();document.getElementById('scrub').value=c.now}
+TW.setOnChange(render);TW.bind();document.getElementById('play').onclick=function(){TW.play(this,render)};document.getElementById('scrub').oninput=function(){TW.state.now=+this.value;TW.state.reviewed=false;TW.state.snooze=false;render()};render();
+</script></body></html>

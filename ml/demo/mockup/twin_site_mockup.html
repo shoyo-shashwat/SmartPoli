@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartPoli demo: Digital Twin site mockup</title>
+<link rel="stylesheet" href="../../../backend/static/style.css">
+<link rel="stylesheet" href="../../../backend/static/doctor.css">
+<link rel="stylesheet" href="../options/twin_common.css">
+<style>
+.m-hide{display:none!important}
+.m-enter{animation:menter .22s ease-out}
+@keyframes menter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.m-wt{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(680px,94vw);background:var(--ink);color:#fff;border-radius:14px;padding:10px 12px;z-index:60;display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;box-shadow:0 10px 30px -10px rgba(0,0,0,.5)}
+.m-wt b{font-size:14.5px}.m-wt span{display:block;font-size:13px;opacity:.85;line-height:1.35}
+.m-wt button{background:#fff;color:var(--ink);border:0;border-radius:8px;min-height:40px;padding:0 14px;font-weight:700;cursor:pointer}
+.m-wt button.alt{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4)}
+.m-dots{display:flex;gap:5px;margin-top:6px}.m-dots i{width:18px;height:4px;border-radius:2px;background:rgba(255,255,255,.25)}.m-dots i.on{background:#6fe0c5}
+.m-pad{height:96px}
+.m-nav-new{margin-left:auto;font-size:11.5px;background:var(--teal-soft);color:var(--teal-dark);padding:2px 8px;border-radius:999px}
+nav.pill-nav.nav-drawer button.active .m-nav-new{background:rgba(255,255,255,.25);color:#fff}
+.m-demo{border:1.5px solid var(--teal);background:var(--teal-soft)}
+.m-demo h2{margin:0 0 4px;font-size:20px}.m-demo p{margin:0 0 12px;color:var(--ink-soft);font-size:15px}
+.m-cred{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface);border-radius:var(--radius-sm);padding:8px 12px;margin-top:8px;font-size:15px}
+.m-cred span{color:var(--ink-soft);font-size:13px;margin-right:8px}
+.m-pt{display:flex;flex-direction:column;gap:6px;cursor:pointer}.m-pt:hover{box-shadow:var(--shadow-card-hover)}
+.m-sumrow{display:flex;gap:8px;flex-wrap:wrap}
+.m-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;align-items:start}
+.m-list{padding:6px}
+.m-row{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;background:transparent;border:1.5px solid transparent;border-radius:var(--radius-sm);padding:10px;min-height:54px;cursor:pointer}
+.m-row:hover{background:var(--paper)}.m-row.sel{background:var(--teal-soft);border-color:var(--teal)}.m-row.sel:hover{background:var(--teal-soft)}
+.m-row b{font-size:15.5px;display:block}.m-row small{display:block;font-size:13px;margin-top:1px}
+.m-dot{width:10px;height:10px;border-radius:50%}
+.m-sep{font-size:13px;color:var(--ink-soft);padding:10px 10px 4px;font-weight:600}
+.m-off{opacity:.55;cursor:default}
+.m-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.m-big{font-size:30px;line-height:1.15;font-weight:700;margin:8px 0 4px}
+.m-strip{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin:14px 0 4px}
+.m-cell{border-radius:8px;padding:8px 2px;text-align:center}.m-cell b{display:block;font-size:19px;line-height:1.1}.m-cell span{display:block;font-size:12px;margin-top:2px;opacity:.8}
+.m-cell.calm{background:var(--teal-soft);color:var(--teal-dark)}.m-cell.watch{background:var(--amber-soft);color:#6a4410}.m-cell.alert{background:var(--alarm-soft);color:#7a2616;box-shadow:inset 0 0 0 1.5px var(--alarm)}.m-cell.high{background:var(--blue-soft);color:#1b4aa0}
+.m-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.m-acts button{min-height:44px}
+.m-more{margin-top:10px;display:flex;gap:16px;flex-wrap:wrap}
+.m-link{background:none;border:0;color:var(--teal-dark);font-weight:600;cursor:pointer;padding:6px 0;min-height:32px;font-family:inherit;font-size:15px}
+.m-curve{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.m-curve svg{width:100%;height:auto;display:block}
+.m-quiet{color:var(--ink-soft);font-size:14px}
+@media(max-width:860px){.m-layout{grid-template-columns:1fr}.m-strip{grid-template-columns:repeat(4,1fr)}.m-big{font-size:26px}.m-wt{grid-template-columns:1fr 1fr}.m-wt .m-text{grid-column:1/-1}}
+</style></head>
+<body class="auth-body">
+
+<div id="login" class="auth-shell">
+  <div class="auth-brand"><span class="brand-mark" aria-hidden="true"></span>SmartPoli</div>
+  <p class="auth-tagline">Turn a confusing prescription into an understandable treatment journey.</p>
+  <div class="card m-demo"><h2>Doctor demo</h2><p>See the Digital Twin on two anonymised patients. No sign-up needed.</p>
+    <button class="primary" style="width:100%" id="enter">Open the doctor demo</button>
+    <div class="m-cred"><div><span>Email</span><code>doctor@smartpoli.demo</code></div><button class="ghost small" data-copy="doctor@smartpoli.demo">Copy</button></div>
+    <div class="m-cred"><div><span>Password</span><code>demo1234</code></div><button class="ghost small" data-copy="demo1234">Copy</button></div></div>
+  <div class="card"><details><summary style="cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center">Log in with another account</summary><p class="tw-foot">The usual email and password form goes here.</p></details></div>
+  <p class="tw-foot">This copy replays anonymised public research data. It is not for medical decisions.</p>
+</div>
+
+<div id="app" class="m-hide">
+  <header class="topbar"><div class="topbar-row"><div class="brand"><span class="brand-mark" aria-hidden="true"></span>SmartPoli</div><span class="tw-chip" style="margin-left:auto">Dr. Rao</span></div></header>
+  <nav class="pill-nav nav-drawer" id="nav" aria-label="Main">
+    <button data-v="patients" class="active"><span class="nav-label">Patients</span></button>
+    <button data-v="twin"><span class="nav-label">Digital Twin</span><span class="m-nav-new">new</span></button>
+    <button disabled><span class="nav-label">Overview</span></button><button disabled><span class="nav-label">Prescriptions</span></button><button disabled><span class="nav-label">Adherence</span></button><button disabled><span class="nav-label">Triage history</span></button><button disabled><span class="nav-label">Notes</span></button><button disabled><span class="nav-label">Settings</span></button>
+  </nav>
+  <div class="body-row"><main class="content" id="main"></main></div>
+</div>
+
+<dialog id="noteDlg"><form method="dialog"><b style="font-size:17px">Clinical note</b><p class="tw-sub">Filled in from what the twin saw. Edit it, then save.</p><textarea id="noteTxt"></textarea><div class="tw-actions"><button class="primary" value="save">Save note</button><button class="ghost" value="cancel">Cancel</button></div></form></dialog>
+<dialog id="howDlg"><b style="font-size:17px">How the twin works</b>
+  <p class="tw-sub" style="margin-top:8px"><b>It looks at</b> the sugar so far, how fast it is changing, meals, insulin, the time of day and facts about the patient. <b>It predicts</b> sugar for the next 2 hours and how likely a low or a high is.</p>
+  <p class="tw-sub"><b>It was checked</b> on 21 patients it had never seen: forecasts were off by about 5 mg/dL at 15 minutes and 17 at 60 minutes, better than assuming sugar stays the same (6.7 and 21). The low alert warned about 24 of 25 low events at 1.5 alerts per patient a day. Most alerts are precautionary: about 1 in 14 is followed by a real low within the hour.</p>
+  <p class="tw-sub"><b>It cannot</b> diagnose or change treatment, it learned from one hospital's patients, and a sensor that reads wrong can cause false alarms.</p>
+  <form method="dialog"><button class="primary">Close</button></form></dialog>
+<div id="toast" role="status"></div>
+
+<div class="m-wt" id="wt"><div style="min-width:0" class="m-text"><b id="wtTitle"></b><span id="wtText"></span><div class="m-dots" id="wtDots"></div></div><button class="alt" id="back">Back</button><button id="next">Next</button></div>
+
+<script src="../options/twin_common.js"></script>
+<script>
+var STEPS=[
+{k:'login',t:'Sign in',x:'The demo copy opens on a Doctor demo card. One tap signs in, and the credentials are visible.'},
+{k:'patients',t:'Patient list',x:'The usual doctor dashboard. The two demo patients are linked and a new Digital Twin item sits in the menu.'},
+{k:'twin',t:'Who needs attention',x:'The twin opens as a worklist, most urgent first. The selected patient shows a one-sentence answer and the next 2 hours.'},
+{k:'why',t:'Why this alert',x:'Why? gives the reasons and the facts worth checking.'},
+{k:'curve',t:'The curve, on demand',x:'Doctors who want the detail can open the forecast curve with its likely range.'},
+{k:'note',t:'What the doctor does next',x:'A note is drafted from what the twin saw. The doctor edits and saves it.'},
+{k:'reviewed',t:'Reviewed',x:'The alert is marked reviewed and the activity is recorded for the timeline and the report.'},
+{k:'later',t:'The twin keeps watching',x:'Two hours on, sugar is still low, so the twin flags the patient again. The list always shows the current state.'}];
+var S={step:0,sel:'A',why:false,curve:false,view:'login'},TIERCOL={alert:'#D3402A',watch:'#B4791F',calm:'#12876F',none:'#B4BDB8'};
+var $=function(i){return document.getElementById(i)};
+function setStep(n){S.step=Math.max(0,Math.min(STEPS.length-1,n));var k=STEPS[S.step].k;
+S.view=k=='login'?'login':(k=='patients'?'patients':'twin');S.why=(k=='why'||k=='curve'||k=='note'||k=='reviewed')?k=='why':S.why;
+if(k=='twin'){S.sel='A';S.why=false;S.curve=false;TW.state.now=592;TW.state.reviewed=false;TW.state.log=[]}
+if(k=='why'){S.why=true;S.curve=false}if(k=='curve'){S.why=true;S.curve=true}
+if(k=='note'){S.why=false;S.curve=false;render();$('noteTxt').value=TW.draft();$('noteDlg').showModal();return}
+if(k=='reviewed'){S.curve=false;S.why=false;if(!TW.state.log.some(function(e){return e.a.indexOf('Note')==0}))TW.act('note','Possible low flagged; reviewing insulin timing');if(!TW.state.reviewed)TW.act('reviewed')}
+if(k=='later'){TW.state.now=705;TW.state.reviewed=false}
+render(true)}
+function chart(c){var W=620,H=250,L=36,R=10,T0=300,T1=780,top=10,ch=190,X=function(m){return L+(m-T0)/(T1-T0)*(W-L-R)},Y=function(v){return top+ch-(Math.max(40,Math.min(240,v))-40)/200*ch},n=c.now,s='';
+s+='<rect x="'+L+'" y="'+Y(70)+'" width="'+(W-L-R)+'" height="'+(Y(40)-Y(70))+'" fill="#FBE2DD" opacity=".6"/><rect x="'+L+'" y="'+Y(240)+'" width="'+(W-L-R)+'" height="'+(Y(180)-Y(240))+'" fill="#FBEBD3" opacity=".6"/>';
+[70,120,180].forEach(function(g){s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(g)+'" y2="'+Y(g)+'" stroke="#8B9A94" stroke-dasharray="4 4"/><text x="'+(L-6)+'" y="'+(Y(g)+4)+'" text-anchor="end" font-size="12" fill="#5C6E68">'+g+'</text>'});
+for(var m=360;m<=780;m+=120)s+='<text x="'+X(m)+'" y="'+(top+ch+18)+'" text-anchor="middle" font-size="12" fill="#5C6E68">'+TW.fmt(m)+'</text>';
+var up=c.f.map(function(q){return X(q.m)+','+Y(q.hi)}),dn=c.f.slice().reverse().map(function(q){return X(q.m)+','+Y(q.lo)});
+s+='<polygon points="'+X(n)+','+Y(c.v)+' '+up.join(' ')+' '+dn.join(' ')+'" fill="#DFF1EA"/><polyline fill="none" stroke="#12876F" stroke-width="2.5" stroke-dasharray="6 5" points="'+X(n)+','+Y(c.v)+' '+c.f.map(function(q){return X(q.m)+','+Y(q.p)}).join(' ')+'"/>';
+var tp=TW.D.pts.filter(function(p){return p[0]>=n&&p[0]<=n+120});s+='<polyline fill="none" stroke="#16241F" stroke-width="2" stroke-dasharray="2 4" opacity=".6" points="'+tp.map(function(p){return X(p[0])+','+Y(p[1])}).join(' ')+'"/>';
+var hp=TW.D.pts.filter(function(p){return p[0]>=T0&&p[0]<=n});s+='<polyline fill="none" stroke="#16241F" stroke-width="3" stroke-linejoin="round" points="'+hp.map(function(p){return X(p[0])+','+Y(p[1])}).join(' ')+'"/><line x1="'+X(n)+'" x2="'+X(n)+'" y1="'+top+'" y2="'+(top+ch)+'" stroke="#12876F"/><circle cx="'+X(n)+'" cy="'+Y(c.v)+'" r="5" fill="#16241F"/>';
+return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Sugar so far, forecast and likely range"><g>'+s+'</g></svg><p class="m-quiet" style="margin:6px 0 0">Black: sugar so far. Green dashed: forecast with its likely range (real values land inside about 8 times in 10). Dotted: what really happened next.</p>'}
+function patientsView(){var c=TW.compute(TW.state.now);var card=function(id,n,l,tw){return '<div class="card m-pt" data-open="'+id+'"><div class="tw-row" style="justify-content:space-between"><b style="font-size:16.5px">'+n+'</b>'+(tw?'<span class="tw-chip reviewed">Digital Twin</span>':'')+'</div><span class="m-quiet">'+l+'</span></div>'};
+return '<h2>Linked patients</h2><input type="text" placeholder="Search patients by name..." style="margin-bottom:12px"><div class="patient-picker-grid">'+card('A','Demo patient A','Woman, 74. Insulin, heart disease',true)+card('B','Demo patient B','Man, 52. Heart-rate data',true)+card('R','Ramesh','Existing demo patient',false)+card('N','Anita','Existing demo patient',false)+card('V','Vikram','Existing demo patient',false)+'</div>'}
+function twinView(){var c=TW.compute(TW.state.now),rv=TW.state.reviewed,tierA=rv?'reviewed':c.tier;
+var rows=[{id:'A',n:'Demo patient A',t:tierA,l:rv?'Reviewed at '+TW.fmt(TW.state.now):c.headline},{id:'B',n:'Demo patient B',t:'watch',l:'Moderate chance of a high after the next meal'}];
+var order={alert:0,watch:1,reviewed:2,calm:3};rows.sort(function(a,b){return order[a.t]-order[b.t]});var cnt={alert:0,watch:0,calm:0,reviewed:0};rows.forEach(function(r){cnt[r.t]++});
+var lab={alert:'Alert',watch:'Watch',calm:'Calm',reviewed:'Reviewed'},col={alert:TIERCOL.alert,watch:TIERCOL.watch,calm:TIERCOL.calm,reviewed:TIERCOL.calm};
+var h='<div class="tw-row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Digital Twin</h2><div class="tw-controls" style="min-width:230px"><span class="m-quiet">Replay</span><input type="range" id="scrub" min="420" max="720" step="15" value="'+TW.state.now+'" aria-label="Replay time"><b id="rt" style="font-size:14px;min-width:42px">'+TW.fmt(TW.state.now)+'</b></div></div>';
+var head=h;h='';
+h+='<div class="m-sumrow" style="margin-bottom:12px">'+(cnt.alert?'<span class="tw-chip" style="background:var(--alarm-soft);color:#7a2616;border-color:var(--alarm-soft)">'+cnt.alert+' alert</span>':'')+(cnt.watch?'<span class="tw-chip heart">'+cnt.watch+' watch</span>':'')+(cnt.calm?'<span class="tw-chip reviewed">'+cnt.calm+' calm</span>':'')+(cnt.reviewed?'<span class="tw-chip reviewed">'+cnt.reviewed+' reviewed</span>':'')+'<span class="m-quiet" style="align-self:center">Replay of anonymised dataset patients</span></div>';
+h+='<div class="m-layout"><div class="card m-list">'+rows.map(function(r){return '<button class="m-row'+(S.sel==r.id?' sel':'')+'" data-sel="'+r.id+'"><span class="m-dot" style="background:'+col[r.t]+'"></span><span><b>'+r.n+'</b><small style="color:'+col[r.t]+'">'+r.l+'</small></span><span class="tw-chip">'+lab[r.t]+'</span></button>'}).join('')+'<div class="m-sep">Without a sugar sensor</div>'+['Ramesh','Anita','Vikram'].map(function(n){return '<div class="m-row m-off"><span class="m-dot" style="background:'+TIERCOL.none+'"></span><span><b>'+n+'</b></span><span></span></div>'}).join('')+'</div><div id="detail">';
+if(S.sel=='A'){var tcol=rv?'var(--ink)':TIERCOL[c.tier];
+h+='<div class="card"><div class="m-head"><div><b style="font-size:18px">Demo patient A</b><div class="m-quiet">Woman, 74. Insulin, coronary heart disease</div></div>'+(rv?'<span class="tw-chip reviewed">Reviewed by Dr. Rao</span>':'')+'</div>';
+h+='<div class="m-big" style="color:'+tcol+'">'+c.headline+'</div><div class="tw-sub" style="margin:0">'+c.headSub+'</div>';
+h+='<div class="m-strip">'+c.cells.map(function(x){return '<div class="m-cell '+x.tier+'"><b>'+Math.round(x.p)+'</b><span>'+TW.fmt(c.now+x.h)+'</span></div>'}).join('')+'</div><div class="m-quiet">Expected sugar (mg/dL) for the next 2 hours</div>';
+if(c.heart&&!rv)h+='<div class="tw-heart" style="margin:14px 0 0">Coronary heart disease: low sugar is linked to heart strain, so this alert deserves a quick look.</div>';
+if(rv){h+='<p class="tw-sub" style="margin:14px 0 0">The twin re-checks in 15 minutes and flags this patient again if the forecast changes. <button class="m-link" data-a="undo">Reopen</button></p>'}
+else if(c.tier=='calm'){h+='<p class="tw-sub" style="margin:14px 0 0">Nothing to do right now. The twin re-checks every 15 minutes.</p>'}
+else{h+='<div class="m-acts"><button class="primary" data-a="note">Write a note</button><button class="ghost" data-a="reviewed">Mark as reviewed</button><button class="ghost" data-a="snooze">Remind me in 1 hour</button></div>'}
+h+='<div class="m-more"><button class="m-link" data-a="why">'+(S.why?'Hide reasons':'Why?')+'</button><button class="m-link" data-a="curve">'+(S.curve?'Hide the curve':'Show the curve')+'</button><button class="m-link" data-a="how">How does this work?</button></div>';
+if(S.why)h+='<div class="m-curve">'+TW.reasonsHTML(c.lowReasons)+'<div style="font-weight:600;margin:10px 0 2px">Worth checking</div><ul class="tw-checks" style="margin-top:2px">'+c.checks.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>';
+if(S.curve)h+='<div class="m-curve">'+chart(c)+'</div>';
+h+='</div><div class="card"><details'+(TW.state.log.length?' open':'')+'><summary style="cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center">Activity'+(TW.state.log.length?' ('+TW.state.log.length+')':'')+'</summary>'+TW.logHTML()+'</details></div>'}
+else{h+='<div class="card"><b style="font-size:18px">Demo patient B</b><div class="m-quiet">Man, 52. Heart-rate data</div><div class="m-big" style="color:'+TIERCOL.watch+'">Moderate chance of a high after the next meal</div><p class="tw-sub" style="margin:0">Shown with a heart-rate strip beside the sugar forecast. Illustrative for now; built from CGMacros participant 38.</p></div>'}
+return {head:head,body:h+'</div></div>'}}
+function render(anim,bodyOnly){var k=STEPS[S.step].k;document.body.className=S.view=='login'?'auth-body':'doctor-page';$('login').classList.toggle('m-hide',S.view!='login');$('app').classList.toggle('m-hide',S.view=='login');
+if(S.view!='login'){document.querySelectorAll('#nav button[data-v]').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-v')==S.view)});if(S.view=='patients'){$('main').innerHTML=patientsView()}else{var tv=twinView();if(!bodyOnly||!$('twbody')){$('main').innerHTML=tv.head+'<div id="twbody">'+tv.body+'</div>'}else{$('twbody').innerHTML=tv.body;$('rt').textContent=TW.fmt(TW.state.now)}}if(anim){$('main').classList.remove('m-enter');void $('main').offsetWidth;$('main').classList.add('m-enter')}}
+else if(anim){$('login').classList.remove('m-enter');void $('login').offsetWidth;$('login').classList.add('m-enter')}
+$('wtTitle').textContent='Step '+(S.step+1)+' of '+STEPS.length+': '+STEPS[S.step].t;$('wtText').textContent=STEPS[S.step].x;$('wtDots').innerHTML=STEPS.map(function(s,i){return '<i class="'+(i<=S.step?'on':'')+'"></i>'}).join('');$('back').style.visibility=S.step?'visible':'hidden';$('next').textContent=S.step==STEPS.length-1?'Start again':'Next'}
+document.addEventListener('click',function(e){var t=e.target,b;
+if(b=t.closest('[data-copy]')){TW.copy(b.getAttribute('data-copy'),b);return}
+if(t.closest('#enter')){setStep(1);return}
+if(b=t.closest('#nav button[data-v]')){var v=b.getAttribute('data-v');if(v=='patients')setStep(1);else setStep(2);return}
+if(b=t.closest('[data-open]')){var id=b.getAttribute('data-open');if(id=='A'||id=='B'){setStep(2);S.sel=id;render(true)}return}
+if(b=t.closest('[data-sel]')){S.sel=b.getAttribute('data-sel');render();return}
+if(b=t.closest('[data-a]')){var a=b.getAttribute('data-a');
+if(a=='why'){S.why=!S.why}else if(a=='curve'){S.curve=!S.curve}else if(a=='how'){$('howDlg').showModal();return}
+else if(a=='note'){$('noteTxt').value=TW.draft();$('noteDlg').showModal();return}
+else if(a=='reviewed'){TW.act('reviewed')}else if(a=='snooze'){TW.act('snooze');TW.state.reviewed=true}else if(a=='undo'){TW.act('undo')}
+render();return}
+if(t.id=='next'){setStep(S.step==STEPS.length-1?0:S.step+1);return}if(t.id=='back'){setStep(S.step-1);return}});
+$('noteDlg').addEventListener('close',function(){if($('noteDlg').returnValue=='save'){var v=$('noteTxt').value;TW.act('note',v.length>60?v.slice(0,60)+'...':v)}render()});
+document.addEventListener('input',function(e){if(e.target.id=='scrub'){TW.state.now=+e.target.value;TW.state.reviewed=false;TW.state.snooze=false;render(false,true)}});
+render(true);
+</script></body></html>
