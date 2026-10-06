@@ -92,8 +92,7 @@
     if (d.review.state === 'reviewed') h += `<span class="twn-chip reviewed">Reviewed by ${esc(d.review.info.by)}</span>`;
     if (d.review.state === 'snoozed') h += '<span class="twn-chip">Snoozed for 1 hour</span>';
     h += `</div><div class="twn-big" style="color:${col}">${esc(d.headline)}</div>`;
-    h += `<div class="twn-mini">${curveSvg(d, w, false)}</div>`;
-    h += `<div class="twn-bar8" role="img" aria-label="Next 2 hours, in 15-minute blocks">${d.forecast.map((p) => `<i style="background:${SEG[tierOf(p, d)]}" title="${hhmm(p.time)}: about ${Math.round(p.mg_dl)} mg/dL"></i>`).join('')}</div><div class="twn-bar8-l"><span>now</span><span>+1 h</span><span>+2 h</span></div>`;
+    h += `<div class="twn-strip" id="twnStrip">${d.forecast.map((p) => `<div class="twn-cell ${tierOf(p, d)}"><b>${Math.round(p.mg_dl)}</b><span>${hhmm(p.time)}</span></div>`).join('')}</div><div class="twn-quiet">Expected sugar (mg/dL) every 15 minutes</div>`;
     const hp = d.high.already_high ? 100 : d.high.chance_percent;
     h += `<div class="twn-meters"><div class="twn-meter"><span>Low sugar</span><b class="twn-chip ${tier}">${{ calm: 'Calm', watch: 'Watch', alert: 'Alert' }[tier]}</b></div>` +
       `<div class="twn-meter"><span>High sugar</span><div class="twn-track" title="${d.high.already_high ? 'Already above 180' : 'Chance of going above 180 in the next 2 hours'}"><i style="width:${hp}%;background:${d.high.already_high ? SEG.high : (d.high.tier === 'calm' ? SEG.calm : d.high.tier === 'watch' ? SEG.watch : SEG.alert)}"></i></div><b>${d.high.already_high ? 'now' : d.high.chance_percent + ' in 100'}</b></div></div>`;
@@ -102,7 +101,7 @@
     if (d.review.state === 'reviewed') h += '<p class="twn-sub" style="margin-top:12px"><button class="twn-link" data-twn="reopen">Reopen</button></p>';
     else if (d.review.state === 'snoozed') h += '<p class="twn-sub" style="margin-top:12px"><button class="twn-link" data-twn="reopen">Reopen</button></p>';
     else if (tier !== 'calm') h += '<div class="twn-acts" id="twnActs"><button class="primary" data-twn="note">Write a note</button><button class="ghost" data-twn="reviewed">Mark reviewed</button><button class="ghost" data-twn="snoozed">Snooze 1 h</button></div>';
-    h += `<div class="twn-more"><button class="twn-link" data-twn="why">${T.why ? 'Hide' : 'Why?'}</button><button class="twn-link" data-twn="curve">${T.curve ? 'Hide curve' : 'Full curve'}</button><button class="twn-link" data-twn="how">How it works</button><button class="twn-link" data-twn="tour">Quick tour</button></div>`;
+    h += `<div class="twn-more"><button class="twn-link" data-twn="why">${T.why ? 'Hide' : 'Why?'}</button><button class="twn-link" data-twn="curve">${T.curve ? 'Hide the curve' : 'Show the curve'}</button><button class="twn-link" data-twn="how">How it works</button></div>`;
     if (T.why) h += `<div class="twn-panel">${reasonsHtml(d.low.reasons)}${d.checks.length ? `<ul class="twn-checks">${d.checks.slice(0, 3).map((c) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}</div>`;
     if (T.curve) h += `<div class="twn-panel">${curveSvg(d, w, true)}${hrSvg(d, Math.max(300, Math.min(900, w)))}<p class="twn-quiet" style="margin:4px 0 0">Black: so far. Green: forecast and likely range. Dotted: what really happened.</p></div>`;
     h += '</div>';
@@ -129,7 +128,7 @@
       const total = Math.round((new Date(d.range.end) - new Date(d.range.start)) / STEP_MS), idx = Math.round((new Date(d.as_of) - new Date(d.range.start)) / STEP_MS);
       ctl = `<div class="twn-controls"><button class="primary small" data-twn="play" aria-label="Play or pause the replay">${T.playing ? 'Pause' : 'Play'}</button><input type="range" id="twnScrub" min="0" max="${total}" step="1" value="${idx}" aria-label="Replay time"><b style="font-size:14px;min-width:92px">${dayLabel(d.as_of, false)}, ${hhmm(d.as_of)}</b></div>`;
     }
-    v.innerHTML = `<div class="twn-top"><h2 style="margin:0">Digital Twin</h2>${ctl}</div>` +
+    v.innerHTML = `<div class="twn-top"><div class="twn-row"><h2 style="margin:0">Digital Twin</h2><button class="ghost small" data-twn="tour" id="twnTourBtn">Take a tour</button></div>${ctl}</div>` +
       `<div class="twn-layout"><div class="card twn-list" id="twnList">${listHtml()}</div><div id="twnDetail">${detailHtml()}</div></div>`;
   }
 
@@ -142,7 +141,6 @@
       const row = T.list.find((p) => p.patient_id === pid);
       if (row) { row.headline = d.headline; row.tier = d.low.tier; row.review = d.review.state; row.as_of = d.as_of; }
       draw();
-      if (T.tour && T.tour.waiting) { T.tour.waiting = false; tourShow(); }
     } catch (e) { toast(e.message); }
   }
 
@@ -157,8 +155,6 @@
       if (!T.sel && T.list.length) T.sel = T.list[0].patient_id;
       draw();
       if (T.sel) await loadDetail(T.sel, null);
-      let seen = false; try { seen = localStorage.getItem('twn_tour_done') === '1'; } catch (e) { /* storage blocked */ }
-      if (!seen && T.d) setTimeout(() => tourStart(), 900);
     } catch (e) { $('view-twin').innerHTML = `<h2>Digital Twin</h2><div class="card"><p class="twn-quiet">${esc(e.message)}</p></div>`; }
   }
 
@@ -205,82 +201,125 @@
     dlg.showModal();
   }
 
-  // ---- guided tour: a pointer glides to each control and says what it is for ------------------------------------
+  // ---- guided tour: only when the viewer asks for it; the pointer glides to each control and Next moves on -------------
   const TOUR = [
-    { sel: '[data-twn=play]', text: 'Press Play to watch the patient\'s day unfold.', click: () => { if (!T.playing) { setPlaying(true); draw(); } }, ms: 4200 },
-    { sel: '#twnScrub', text: 'Or drag to any moment.', before: () => { if (T.playing) { setPlaying(false); draw(); } }, ms: 3200 },
-    { sel: '.twn-mini', text: 'Black line: sugar so far. Green band: where it is expected to go.', ms: 4200 },
-    { sel: '.twn-bar8', text: 'The next 2 hours, 15 minutes per block. Green calm, amber watch, red alert.', ms: 4200 },
-    { sel: '[data-twn=why]', text: 'Tap Why? to see what drove it.', ms: 3200 },
-    { sel: '#twnActs', text: 'Then write a note or mark it reviewed.', optional: true, ms: 3400 },
+    { sel: '[data-twn=play]', text: 'Play replays this patient\'s day. Try it.', press: true },
+    { sel: '#twnScrub', text: 'Or drag to any moment.' },
+    { sel: '#twnStrip', text: 'The next 2 hours, 15 minutes per block. Green calm, amber watch, red alert.' },
+    { sel: '.twn-meters', text: 'The low-sugar level, and the chance of a high.' },
+    { sel: '[data-twn=why]', text: 'Why? shows what drove it.', press: true },
+    { sel: '[data-twn=curve]', text: 'Show the curve opens the full chart.', press: true },
+    { sel: '#twnActs', text: 'Then write a note or mark it reviewed.', optional: true },
   ];
+  const P = { x: 0, y: 0, raf: 0, wd: 0, follow: 0, gliding: false };
 
-  function tourEnd(done) {
-    if (T.tour) { clearTimeout(T.tour.timer); T.tour = null; }
+  function tourEnd() {
+    cancelAnimationFrame(P.raf); clearInterval(P.wd); P.gliding = false;
+    T.tour = null;
     ['twnPtr', 'twnTip'].forEach((id) => { const el = $(id); if (el) el.remove(); });
-    if (T.playing) { setPlaying(false); draw(); }
-    if (done) { try { localStorage.setItem('twn_tour_done', '1'); } catch (e) { /* storage blocked */ } }
   }
 
-  function tourStart() {
-    if (!T.d || !$('view-twin') || $('view-twin').style.display === 'none') return;
-    tourEnd(false);
-    T.tour = { i: -1, timer: null, waiting: false };
+  // where the pointer should rest on a control: the middle of a button, the left part of a wide block; always inside the screen
+  function tourTarget(sel) {
+    const el = document.querySelector(sel); if (!el) return null;
+    const r = el.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight, wide = r.width > 300;
+    const x = wide ? r.left + Math.min(r.width * 0.3, 140) : r.left + r.width / 2;
+    return { x: Math.max(14, Math.min(vw - 14, x)), y: Math.max(14, Math.min(vh - 14, r.top + r.height / 2)), r };
+  }
+
+  function tourPlace() {
+    const ptr = $('twnPtr'); if (ptr) ptr.style.transform = `translate3d(${P.x}px, ${P.y}px, 0)`;
+  }
+
+  // the caption sits on whichever side of the control has room, and never leaves the screen
+  function tipPlace(tg) {
+    const tip = $('twnTip'); if (!tip || !tg) return;
+    const vw = window.innerWidth, vh = window.innerHeight, w = Math.min(340, vw - 24);
+    tip.style.width = w + 'px';
+    const h = tip.getBoundingClientRect().height, gap = 28;
+    const below = (vh - tg.r.bottom) >= (tg.r.top) || vh - tg.r.bottom > h + gap + 10;
+    const top = below ? Math.min(vh - h - 10, Math.max(10, tg.y + gap)) : Math.max(10, Math.min(vh - h - 10, tg.y - gap - h));
+    tip.style.top = top + 'px';
+    tip.style.left = Math.max(12, Math.min(vw - w - 12, tg.x - w * 0.25)) + 'px';
+  }
+
+  // glide: ease in and out along a gentle arc. The target is re-read every frame, so scrolling or resizing never makes it jump.
+  // Driven by the screen's frame clock; a 40 ms watchdog takes over if the browser pauses frames (a background pane), so it never freezes.
+  function glide(sel, done) {
+    cancelAnimationFrame(P.raf); clearInterval(P.wd);
+    const first = tourTarget(sel); if (!first) { if (done) done(); return; }
+    P.gliding = true;
+    const sx = P.x, sy = P.y, dist = Math.hypot(first.x - sx, first.y - sy);
+    const D = Math.min(1800, Math.max(850, 520 + dist * 1.15)), t0 = performance.now();   // the pointer always glides: the tour is something the viewer asked for
+    const nx = -(first.y - sy) / (dist || 1), ny = (first.x - sx) / (dist || 1), arc = calmMotion() ? 0 : Math.min(70, dist * 0.14);   // a straight, plain glide when the system asks for reduced motion
+    let last = 0, over = false;
+    const tick = (now) => {
+      if (over) return;
+      last = performance.now();
+      const tg = tourTarget(sel); if (!tg) { over = true; clearInterval(P.wd); return; }
+      const t = D ? Math.min(1, (now - t0) / D) : 1;
+      const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, bend = Math.sin(Math.PI * e) * arc;
+      P.x = sx + (tg.x - sx) * e + nx * bend; P.y = sy + (tg.y - sy) * e + ny * bend; tourPlace();
+      if (t >= 1) { over = true; clearInterval(P.wd); P.gliding = false; P.x = tg.x; P.y = tg.y; tourPlace(); tipPlace(tg); if (done) done(); }
+    };
+    const loop = (now) => { tick(now); if (!over) P.raf = requestAnimationFrame(loop); };
+    P.raf = requestAnimationFrame(loop);
+    P.wd = setInterval(() => { if (performance.now() - last > 70) tick(performance.now()); }, 40);
+  }
+
+  function tourStart(fromEl) {
+    if (!T.d) return;
+    tourEnd();
+    const b = fromEl ? fromEl.getBoundingClientRect() : null;
+    P.x = b ? b.left + b.width / 2 : window.innerWidth * 0.5; P.y = b ? b.top + b.height / 2 : window.innerHeight * 0.4;
+    T.tour = { i: -1 };
     const ptr = document.createElement('div'); ptr.id = 'twnPtr'; ptr.setAttribute('aria-hidden', 'true');
     ptr.innerHTML = '<svg viewBox="0 0 24 24" width="30" height="30"><path d="M4 2l15 9-6.5 1.7L9 19z" fill="#16241F" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="twn-ripple"></span>';
     const tip = document.createElement('div'); tip.id = 'twnTip'; tip.setAttribute('role', 'dialog'); tip.setAttribute('aria-label', 'Quick tour');
-    document.body.appendChild(ptr); document.body.appendChild(tip);
-    tourNext(1);
+    document.body.appendChild(ptr); document.body.appendChild(tip); tourPlace();
+    tourStep(1);
   }
 
-  function tourNext(dir) {
+  function tourStep(dir) {
     const t = T.tour; if (!t) return;
     let i = t.i + dir;
     while (i >= 0 && i < TOUR.length && TOUR[i].optional && !document.querySelector(TOUR[i].sel)) i += dir;
-    if (i >= TOUR.length) { tourEnd(true); return; }
-    if (i < 0) i = 0;
-    t.i = i; tourShow();
+    if (i >= TOUR.length) { tourEnd(); return; }
+    t.i = i < 0 ? 0 : i;
+    const s = TOUR[t.i], tip = $('twnTip'), el = document.querySelector(s.sel);
+    if (!el) { tourStep(dir); return; }
+    let lastIdx = TOUR.length - 1;
+    while (lastIdx > 0 && TOUR[lastIdx].optional && !document.querySelector(TOUR[lastIdx].sel)) lastIdx--;
+    tip.innerHTML = `<div class="twn-tip-text">${esc(s.text)}</div><div class="twn-tip-step">Step ${t.i + 1} of ${lastIdx + 1}</div><div class="twn-tip-btns"><button type="button" data-tour="skip">Skip</button><button type="button" data-tour="back"${t.i === 0 ? ' disabled' : ''}>Back</button><button type="button" class="go" data-tour="next">${t.i >= lastIdx ? 'Done' : 'Next'}</button></div>`;
+    tipPlace(tourTarget(s.sel));
+    el.scrollIntoView({ block: 'center', behavior: calmMotion() ? 'auto' : 'smooth' });
+    glide(s.sel, () => {
+      const ptr = $('twnPtr'); if (!ptr || !s.press) return;
+      ptr.classList.remove('click'); void ptr.offsetWidth; ptr.classList.add('click');
+    });
   }
 
-  function tourShow() {
-    const t = T.tour; if (!t) return;
-    const s = TOUR[t.i];
-    if (s.before) s.before();
-    const el = document.querySelector(s.sel);
-    if (!el) { t.waiting = true; return; }
-    clearTimeout(t.timer);
-    el.scrollIntoView({ block: 'center', behavior: calmMotion() ? 'auto' : 'smooth' });
-    setTimeout(() => {
-      if (!T.tour) return;
-      const el2 = document.querySelector(s.sel); if (!el2) return;
-      const r = el2.getBoundingClientRect(), big = r.width > 260;
-      const x = big ? r.left + Math.min(90, r.width / 4) : r.left + r.width / 2, y = big ? r.top + Math.min(50, r.height / 2) : r.top + r.height / 2;
-      const ptr = $('twnPtr'), tip = $('twnTip'); if (!ptr || !tip) return;
-      ptr.style.transition = calmMotion() ? 'none' : 'transform .9s cubic-bezier(.45,.05,.2,1)';
-      ptr.style.transform = `translate(${x}px, ${y}px)`;
-      const below = y < window.innerHeight - 190;
-      tip.className = below ? 'below' : 'above';
-      tip.innerHTML = `<div class="twn-tip-text">${esc(s.text)}</div><div class="twn-tip-row"><span class="twn-dots">${TOUR.map((_, k) => `<i class="${k === t.i ? 'on' : ''}"></i>`).join('')}</span><span><button class="twn-link" data-tour="back"${t.i === 0 ? ' style="visibility:hidden"' : ''}>Back</button><button class="primary small" data-tour="next">${t.i === TOUR.length - 1 ? 'Done' : 'Next'}</button><button class="twn-link" data-tour="skip">Skip</button></span></div>`;
-      const tw = Math.min(320, window.innerWidth - 24);
-      tip.style.width = tw + 'px';
-      tip.style.left = Math.max(12, Math.min(window.innerWidth - tw - 12, x - 40)) + 'px';
-      tip.style.top = below ? (y + 30) + 'px' : (y - 30 - 118) + 'px';
-      const arrive = calmMotion() ? 0 : 950;
-      setTimeout(() => { if (!T.tour) return; ptr.classList.remove('click'); void ptr.offsetWidth; ptr.classList.add('click'); if (s.click) s.click(); }, arrive);
-      t.timer = setTimeout(() => tourNext(1), (s.ms || 3600) + arrive);
-    }, calmMotion() ? 0 : 350);
+  function tourFollow() {
+    if (!T.tour || P.follow || P.gliding) return;
+    P.follow = requestAnimationFrame(() => {
+      P.follow = 0; if (!T.tour) return;
+      const s = TOUR[T.tour.i], tg = s && tourTarget(s.sel); if (!tg) return;
+      P.x = tg.x; P.y = tg.y; tourPlace(); tipPlace(tg);
+    });
   }
+  window.addEventListener('resize', tourFollow);
+  window.addEventListener('scroll', tourFollow, true);
 
   document.addEventListener('click', (e) => {
     const tb = e.target.closest('[data-tour]');
-    if (tb) { const a = tb.dataset.tour; if (a === 'next') tourNext(1); else if (a === 'back') tourNext(-1); else tourEnd(true); return; }
+    if (tb) { const a = tb.dataset.tour; if (a === 'next') tourStep(1); else if (a === 'back') tourStep(-1); else tourEnd(); return; }
     const view = $('view-twin'); if (!view || !view.contains(e.target)) return;
     const s = e.target.closest('[data-twn-sel]');
     if (s) { T.sel = +s.dataset.twnSel; T.d = null; T.why = T.curve = false; setPlaying(false); draw(); loadDetail(T.sel, (T.list.find((p) => p.patient_id === T.sel) || {}).as_of || null); return; }
     const b = e.target.closest('[data-twn]'); if (!b) return;
     const a = b.dataset.twn;
     if (a === 'why') { T.why = !T.why; draw(); } else if (a === 'curve') { T.curve = !T.curve; draw(); } else if (a === 'how') howDialog();
-    else if (a === 'note') noteDialog(); else if (a === 'play') { setPlaying(!T.playing); draw(); } else if (a === 'tour') tourStart();
+    else if (a === 'note') noteDialog(); else if (a === 'play') { setPlaying(!T.playing); draw(); } else if (a === 'tour') tourStart(b);
     else if (a === 'reopen') act('reopened'); else if (a === 'reviewed' || a === 'snoozed') act(a);
   });
   document.addEventListener('input', (e) => {
@@ -289,7 +328,7 @@
     const at = toIso(new Date(new Date(T.d.range.start).getTime() + (+e.target.value) * STEP_MS));
     clearTimeout(T.wait); T.wait = setTimeout(() => loadDetail(T.sel, at), 150);
   });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && T.tour) tourEnd(true); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && T.tour) tourEnd(); });
 
   window.twinRender = function () { if (!T.enabled) return; if (!T.loaded) { $('view-twin').innerHTML = '<h2>Digital Twin</h2><div class="card"><p class="twn-quiet">Loading...</p></div>'; load(); } else draw(); };
   init();

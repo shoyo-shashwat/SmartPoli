@@ -81,3 +81,13 @@ dialog.twn-dlg textarea { width: 100%; min-height: 130px; font: inherit; padding
 #twnTip .twn-dots i { width: 14px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.28); }
 #twnTip .twn-dots i.on { background: #6fe0c5; }
 @media (max-width: 860px) { .twn-big { font-size: 24px; } .twn-meter { grid-template-columns: 78px 1fr auto; } }
+
+/* ---- v3: the tour caption and its three buttons (same size, same type, clear gaps) -------------------------------- */
+#twnTip { padding: 16px; border-radius: 16px; }
+#twnTip .twn-tip-text { font-size: 16px; font-weight: 600; line-height: 1.4; }
+#twnTip .twn-tip-step { margin-top: 6px; font-size: 13px; color: rgba(255,255,255,.65); }
+#twnTip .twn-tip-btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+#twnTip .twn-tip-btns button { min-height: 44px; padding: 0 12px; border-radius: 10px; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.4); }
+#twnTip .twn-tip-btns button.go { background: var(--teal); border-color: var(--teal); }
+#twnTip .twn-tip-btns button:disabled { opacity: .35; cursor: default; }
+#twnTip .twn-tip-btns button:focus-visible { outline: 3px solid #9FE1CB; outline-offset: 2px; }
