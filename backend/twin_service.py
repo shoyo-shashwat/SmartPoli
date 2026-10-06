@@ -162,7 +162,7 @@ def predict(profile, grid, events, at, history_minutes=360):
     else:
         tier, low_text = "calm", f"Sugar is {round(v)} mg/dL and no low is expected in the next hour."
     headline = {"alert": ("Sugar is already low" if already_low else f"Possible low in about {lowest_at} minutes"),
-                "watch": "Sugar is drifting down. Keep an eye on the next hour", "calm": "No low expected in the next hour"}[tier]
+                "watch": "Sugar drifting down", "calm": "No low expected"}[tier]
 
     sc = _predict(models["spike120"], row, names, contribs=True)
     p_spike = float(1 / (1 + math.exp(-sc.sum())))                 # contributions sum to the margin

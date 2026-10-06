@@ -54,3 +54,30 @@ dialog.twn-dlg textarea { width: 100%; min-height: 130px; font: inherit; padding
 .twn-cred span { color: var(--ink-soft); font-size: 13px; margin-right: 8px; }
 @media (max-width: 860px) { .twn-layout { grid-template-columns: 1fr; } .twn-strip { grid-template-columns: repeat(4, 1fr); } .twn-big { font-size: 26px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ---- v2: less text, more picture ------------------------------------------------------------------------------ */
+.twn-big { font-size: 28px; margin: 10px 0 6px; }
+.twn-mini { margin-top: 6px; border-radius: var(--radius-sm); overflow: hidden; }
+.twn-bar8 { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin-top: 10px; }
+.twn-bar8 i { height: 16px; border-radius: 5px; display: block; }
+.twn-bar8-l { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--ink-soft); margin-top: 3px; }
+.twn-meters { display: grid; gap: 8px; margin-top: 14px; }
+.twn-meter { display: grid; grid-template-columns: 92px 1fr auto; gap: 10px; align-items: center; font-size: 14.5px; }
+.twn-meter > span { color: var(--ink-soft); }
+.twn-track { height: 10px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.twn-track i { display: block; height: 100%; border-radius: 5px; }
+.twn-meter > b:not(.twn-chip) { font-size: 14px; min-width: 64px; text-align: right; }
+.twn-meter .twn-chip { grid-column: 2 / 4; justify-self: start; }
+.twn-heart { margin-top: 12px; padding: 9px 12px; font-size: 14.5px; }
+#twnPtr { position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none; margin: -2px 0 0 -5px; filter: drop-shadow(0 3px 5px rgba(0,0,0,.35)); }
+#twnPtr .twn-ripple { position: absolute; left: 0; top: 0; width: 14px; height: 14px; margin: -7px 0 0 -3px; border-radius: 50%; border: 3px solid var(--teal); opacity: 0; }
+#twnPtr.click .twn-ripple { animation: twnRipple .7s ease-out; }
+@keyframes twnRipple { from { opacity: .95; transform: scale(.4); } to { opacity: 0; transform: scale(3.4); } }
+#twnTip { position: fixed; z-index: 91; background: var(--ink); color: #fff; border-radius: 14px; padding: 12px 14px; box-shadow: 0 14px 34px -12px rgba(0,0,0,.6); font-size: 15.5px; line-height: 1.45; }
+#twnTip .twn-tip-text { font-weight: 600; }
+#twnTip .twn-tip-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; }
+#twnTip .twn-link { color: #9FE1CB; }
+#twnTip .twn-dots { display: inline-flex; gap: 4px; }
+#twnTip .twn-dots i { width: 14px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.28); }
+#twnTip .twn-dots i.on { background: #6fe0c5; }
+@media (max-width: 860px) { .twn-big { font-size: 24px; } .twn-meter { grid-template-columns: 78px 1fr auto; } }
