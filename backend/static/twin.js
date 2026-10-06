@@ -155,6 +155,11 @@
       if (!T.sel && T.list.length) T.sel = T.list[0].patient_id;
       draw();
       if (T.sel) await loadDetail(T.sel, null);
+      // first visit only: open the tour once by itself; from then on the viewer drives it (Next / Back / Skip, or Take a tour again)
+      let seen = T.autoTour;
+      try { seen = seen || localStorage.getItem('twn_tour_seen') === '1'; localStorage.setItem('twn_tour_seen', '1'); } catch (e) { /* storage blocked: once per page load */ }
+      T.autoTour = true;
+      if (!seen && T.d) setTimeout(() => { if (!T.tour && $('twnTourBtn') && $('view-twin').style.display !== 'none') tourStart($('twnTourBtn')); }, 900);
     } catch (e) { $('view-twin').innerHTML = `<h2>Digital Twin</h2><div class="card"><p class="twn-quiet">${esc(e.message)}</p></div>`; }
   }
 

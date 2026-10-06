@@ -91,3 +91,7 @@ dialog.twn-dlg textarea { width: 100%; min-height: 130px; font: inherit; padding
 #twnTip .twn-tip-btns button.go { background: var(--teal); border-color: var(--teal); }
 #twnTip .twn-tip-btns button:disabled { opacity: .35; cursor: default; }
 #twnTip .twn-tip-btns button:focus-visible { outline: 3px solid #9FE1CB; outline-offset: 2px; }
+
+/* the tour button stands out by colour */
+#twnTourBtn { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; box-shadow: 0 4px 10px -4px rgba(46, 111, 224, 0.55); }
+#twnTourBtn:hover { filter: brightness(1.08); }
