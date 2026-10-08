@@ -96,4 +96,6 @@ for name, grid, events, at, check, expect in cases:
     fc = ", ".join(f"{p['mg_dl']:.0f}" for p in r["forecast"][:4])
     print(f"  {'INFO' if ok is None else 'PASS' if ok else 'FAIL'}  {name}")
     print(f"        now {r['current']:.0f} mg/dL, forecast next hour {fc} | low: {r['low']['tier']} ({r['headline']}) | high chance {r['high']['chance_percent']}% | expected: {expect}")
-print(f"\n  {len(cases) - bad} of {len(cases)} behaviour checks passed")
+n = sum(c[4] is not None for c in cases)
+print(f"
+  {n - bad} of {n} behaviour checks passed (1b is information only)")
