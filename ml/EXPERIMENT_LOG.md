@@ -18,3 +18,15 @@ Reproduce: run from `ml/` with `python <script> data/shanghai_t2dm_clean` (data 
 - Numbers are small-sample: 25 low events, 6 patients, one patient (2094) has 13 of them. Treat recall as promising, not proven.
 - "Alert followed by a low" counts an alert run that contains a moment with a low starting within 60 min.
 - Not tried (kept honest): extra datasets (mostly type 1, different lows, licences unchecked) and synthetic data (cannot be scored fairly).
+
+## Dataset scouting for more low events (8 Oct 2026; searched, not downloaded or used)
+Checked: web search, PhysioNet, AWS Open Data Registry, data.gov / datahub.io / WHO GHO searches, IEEE DataPort, OMIX.
+| Source | What it is | Access found | Fit |
+|---|---|---|---|
+| IEEE DataPort "Continuous glucose measurement for inpatient with type 2 diabetes" (DOI 10.21227/adzq-2y15) | 43 hospital inpatients with T2D, Dexcom G5/G6, 5-min, 7-10 days, readings clipped to 40-400 | "Requires an IEEE DataPort subscription" (licence not shown) | Closest to our population, but hospital setting, first day unreliable, access not free |
+| OMIX002495 (CNCB) "CGM-based hypoglycemia prediction" | Hypoglycemia-focused CGM + clinical data; diabetes type not stated | Not confirmed on the page we read; sibling OMIX002493 (60 T2D patients) is controlled-access | Unknown until access is checked |
+| CGMacros (PhysioNet) | 45 people (14 T2D, 16 pre-diabetes) | Open, CC BY-NC-SA 4.0 | Already used for demo patient B only; few lows, non-commercial |
+| DiaTrend, OhioT1DM, T1DEXI | Type 1 | Reported as data-use-agreement restricted (secondary source) | Different physiology; not free |
+| DiaData (T1D, 13 sets merged), HUPA-UCM | Type 1 | Reported open (secondary source) | Different physiology |
+| AWS Open Data Registry, data.gov, datahub.io, WHO GHO | - | No patient-level CGM dataset found; WHO GHO is country-level aggregates | Not usable |
+Rule if any is added later: training only, a "which dataset" flag, scoring stays on the locked ShanghaiT2DM test group.
