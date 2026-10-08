@@ -1,0 +1,12 @@
+EXPERIMENT 3: weighting low-sugar rows in the forecast (training rows with sugar now < 120 mg/dL)
+=== development patients (79), out-of-fold; rule 90/100; offset 0 = unchanged rule ===
+  weight  1: MAE sugar<100  +30 7.15  +60 12.51 | rule as is: 1.88 alerts/day, warned 66/66, precision 4.2% | to warn >= 64: offset -4 -> 1.52 alerts/day, warned 64, precision 5.0%
+  weight  3: MAE sugar<100  +30 7.45  +60 12.72 | rule as is: 1.86 alerts/day, warned 66/66, precision 4.3% | to warn >= 64: offset -2 -> 1.65 alerts/day, warned 66, precision 4.8%
+  weight  6: MAE sugar<100  +30 7.44  +60 12.98 | rule as is: 1.88 alerts/day, warned 66/66, precision 4.3% | to warn >= 64: offset -2 -> 1.66 alerts/day, warned 65, precision 4.8%
+  weight 10: MAE sugar<100  +30 7.59  +60 13.03 | rule as is: 1.83 alerts/day, warned 66/66, precision 4.5% | to warn >= 64: offset -2 -> 1.63 alerts/day, warned 64, precision 4.8%
+chosen on development: weight 1, threshold offset -4 mg/dL
+
+=== locked test group, scored once ===
+  current model (weight 1)                             MAE sugar<100 +30 7.32 +60 12.85 | 1.50 alerts/day, warned 24/25, precision 6.7%
+  weight 1, rule as is                                 MAE sugar<100 +30 7.28 +60 12.94 | 1.52 alerts/day, warned 24/25, precision 6.6%
+  weight 1, offset -4 chosen on development            MAE sugar<100 +30 7.28 +60 12.94 | 1.12 alerts/day, warned 21/25, precision 7.6%
