@@ -5,7 +5,7 @@ For a patient with a continuous glucose sensor, it forecasts sugar for the next 
 words, and gives the doctor a short list of next steps. It is a risk flag for the doctor. It never diagnoses and never changes a treatment.
 
 > **Submission details (the team fills these in before 20 Oct 2026, 7:00 PM IST):**
-> Live demo: `TODO URL` | Team name: **Nexons** | College: **GL Bajaj Institute of Technology and Management** | Members: **Garv Chopra, Shashwat Shukla, Vishesh Agrahari** | Demo video (at least 20 minutes): `TODO link` |
+> Live demo: [https://smartpoli-kxzt.onrender.com](https://smartpoli-kxzt.onrender.com) | Team name: **Nexons** | College: **GL Bajaj Institute of Technology and Management** | Members: **Garv Chopra, Shashwat Shukla, Vishesh Agrahari** | Demo video (at least 20 minutes): `TODO link` |
 > Architecture diagram (PDF/PPT): `TODO` | Presentation (PDF/PPT): `TODO` | Submission folder name: `Nexons_GL Bajaj Institute of Technology and Management`
 
 ## 1. The problem and the use case
@@ -103,7 +103,7 @@ Full output: `ml/final_test_results.txt` and `ml/extra_metrics_results.txt`.
 
 ## 7. Try it
 
-**Live demo:** `TODO URL`. Open it, tap **Open the doctor demo**, then **Digital Twin** in the menu. A short on-screen tour starts by itself the first time; after that you drive it.
+**Live demo:** [https://smartpoli-kxzt.onrender.com](https://smartpoli-kxzt.onrender.com). Open it, tap **Open the doctor demo**, then **Digital Twin** in the menu. A short on-screen tour starts by itself the first time; after that you drive it.
 
 Run it locally (optional):
 
