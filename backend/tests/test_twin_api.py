@@ -109,3 +109,21 @@ def test_headline_follows_a_high_that_is_already_happening():
     assert high["headline"].startswith("Sugar is above 180") or high["headline"].startswith("Sugar above 180")
     low = twin_service.predict(d["profile"], grid, events, datetime(2020, 11, 10, 10, 7))            # the low warning still wins
     assert low["focus"]["kind"] == "low" and low["low"]["tier"] == "alert"
+
+
+def test_demo_patient_a_gets_the_medicines_and_recorded_doses_from_the_research_record():
+    import twin_demo_seed
+    from db import Dose, Medicine, Patient, Prescription
+    twin_demo_seed.seed_twin_demo()
+    twin_demo_seed.seed_twin_demo()                      # safe to run twice
+    db = SessionLocal()
+    try:
+        a = db.query(Patient).filter(Patient.name == "Demo patient A").first()
+        pres = db.query(Prescription).filter(Prescription.patient_id == a.id).all()
+        assert len(pres) == 1 and pres[0].doctor_name.startswith("Research record")
+        meds = db.query(Medicine).filter(Medicine.prescription_id == pres[0].id).all()
+        assert {m.name for m in meds} >= {"Insulin glargine", "Humulin 70/30", "Aspirin"}
+        doses = [d for m in meds for d in db.query(Dose).filter(Dose.medicine_id == m.id).all()]
+        assert doses and all(d.state == "taken" for d in doses)            # nothing invented as missed
+    finally:
+        db.close()

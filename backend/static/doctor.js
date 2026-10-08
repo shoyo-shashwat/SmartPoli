@@ -437,8 +437,10 @@ function renderAdherenceTab() {
     <tr><td data-label="When">${new Date(d.scheduled_at).toLocaleString()}</td><td data-label="Medicine">${d.medicine_name}</td></tr>
   `).join('') || '<tr><td colspan="2" class="empty">None</td></tr>';
 
+  const srcNote = r.data_source ? `<p style="color:var(--ink-soft);font-size:14px;line-height:1.5;margin:0 4px 14px;">From a research record (${String(r.data_source).replace(/[<>&"']/g, '')}): these are the insulin doses written in the record, each shown as taken. The record does not list missed doses, so 100% here is not a measured adherence.</p>` : '';
   view.innerHTML = `
     <h2 style="margin-top:26px;">Adherence</h2>
+    ${srcNote}
 
     <div class="stat-row" style="margin-bottom:16px;">
       <div class="stat">${iconBadge('teal', 'chartBar')}<div><div class="num">${r.adherence.adherence_percent ?? '—'}${r.adherence.adherence_percent !== null ? '%' : ''}</div><div class="label">Adherence</div></div></div>
@@ -464,12 +466,14 @@ function renderTriageTab() {
       <td data-label="Action">${c.action}</td>
     </tr>
   `).join('') || '<tr><td colspan="4" class="empty">None</td></tr>';
+  const srcNote = r.data_source && !r.symptom_history.length
+    ? `<p style="color:var(--ink-soft);font-size:14px;line-height:1.5;margin:12px 4px 0;">No symptom checks: this demo patient comes from a research dataset (${String(r.data_source).replace(/[<>&"']/g, '')}), which records sugar, meals and doses but not symptoms.</p>` : '';
 
   view.innerHTML = `
     <h2 style="margin-top:26px;">Triage history</h2>
     <div class="card">
       <div class="card-head">${iconBadge('teal', 'stethoscope')}<h3>Symptoms &amp; triage history</h3></div>
-      <div class="table-scroll"><table class="responsive-table"><thead><tr><th>Date</th><th>Symptoms</th><th>Severity</th><th>Action</th></tr></thead><tbody>${triageHtml}</tbody></table></div>
+      <div class="table-scroll"><table class="responsive-table"><thead><tr><th>Date</th><th>Symptoms</th><th>Severity</th><th>Action</th></tr></thead><tbody>${triageHtml}</tbody></table></div>${srcNote}
     </div>
   `;
 }

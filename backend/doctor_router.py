@@ -135,6 +135,9 @@ def doctor_patient_detail(patient_id: int, user: User = Depends(require_doctor_r
     if not has_read_access(db, user, patient_id):
         raise HTTPException(403, "You are not linked to this patient.")
     report = gather_report_data(db, patient_id, INTERACTION_RULESET, FOOD_RULESET)
+    from db import TwinProfile
+    tp = db.query(TwinProfile).filter(TwinProfile.patient_id == patient_id).first()
+    report["data_source"] = tp.data_source if tp else None          # set for research-data demo patients: they have sugar, meals and doses but no symptom checks
     report["brief"] = compute_doctor_brief(db, patient_id)
     report["since_last_visit"] = compute_since_last_visit(db, patient_id, user.id)
     return report
