@@ -30,3 +30,6 @@ Checked: web search, PhysioNet, AWS Open Data Registry, data.gov / datahub.io / 
 | DiaData (T1D, 13 sets merged), HUPA-UCM | Type 1 | Reported open (secondary source) | Different physiology |
 | AWS Open Data Registry, data.gov, datahub.io, WHO GHO | - | No patient-level CGM dataset found; WHO GHO is country-level aggregates | Not usable |
 Rule if any is added later: training only, a "which dataset" flag, scoring stays on the locked ShanghaiT2DM test group.
+
+### Decision (8 Oct 2026): no extra datasets
+AI-READI (v3.0.0, 2,280 participants incl. an insulin-controlled type 2 group, Dexcom G6 5-min) is the best fit, but its licence (v2.0) requires storage on institution-managed machines or BAA cloud storage, bars sharing data with third-party AI models, treats synthetic/derivative data as the data, and needs a verified-ID login. We cannot meet the storage condition, so we did not apply. Other sources (IEEE DataPort subscription, OMIX controlled access, Jaeb requests, hemodialysis trial) are too slow or unconfirmed before 20 Oct. Lows stay as a forecast-based alert; limits stated plainly in the write-up; AI-READI named as future work.
