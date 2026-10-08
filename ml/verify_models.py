@@ -97,5 +97,4 @@ for name, grid, events, at, check, expect in cases:
     print(f"  {'INFO' if ok is None else 'PASS' if ok else 'FAIL'}  {name}")
     print(f"        now {r['current']:.0f} mg/dL, forecast next hour {fc} | low: {r['low']['tier']} ({r['headline']}) | high chance {r['high']['chance_percent']}% | expected: {expect}")
 n = sum(c[4] is not None for c in cases)
-print("
-  %d of %d behaviour checks passed (1b is information only)" % (n - bad, n))
+print(chr(10) + "  %d of %d behaviour checks passed (1b is information only)" % (n - bad, n))
