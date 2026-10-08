@@ -1,0 +1,19 @@
+EXPERIMENT 5: per-patient tuning and recalibration (adapting to the patient's own earlier data)
+
+DEVELOPMENT (out-of-fold): 75 patients, 60785 scored moments (after each recording's first 3 days)
+  method                              MAE +30  MAE +60  spike Brier  spike ECE  alerts/day  lows warned
+  M0 global model as is                  9.79    16.42       0.1029      0.018        1.91     46 of 46
+  M1 fixed bias (first 3 days)           9.65    16.08          nan        nan        1.99     45 of 46
+  M2 rolling bias (last 2 days)          9.48    15.68          nan        nan        2.10     45 of 46
+  M3 linear recalibration, half-shrunk     9.65    16.11          nan        nan        1.79     46 of 46
+  M5 spike level shift                    nan      nan       0.0980      0.019         nan            -
+
+best on development at +60 min: M2 rolling bias (last 2 days); clearly better than M0 by the pre-set bar (0.3 mg/dL at +60, not worse at +30): True
+
+LOCKED TEST (scored once): 20 patients, 18387 scored moments (after each recording's first 3 days)
+  method                              MAE +30  MAE +60  spike Brier  spike ECE  alerts/day  lows warned
+  M0 global model as is                  9.58    16.48       0.1147      0.029        1.49     20 of 20
+  M1 fixed bias (first 3 days)           9.54    16.21          nan        nan        1.40     19 of 20
+  M2 rolling bias (last 2 days)          9.30    15.61          nan        nan        1.55     20 of 20
+  M3 linear recalibration, half-shrunk     9.51    16.08          nan        nan        1.33     19 of 20
+  M5 spike level shift                    nan      nan       0.1060      0.035         nan            -
