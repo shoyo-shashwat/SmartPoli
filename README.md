@@ -1,11 +1,11 @@
 # SmartPoli Digital Twin
 
-A digital twin for **type 2 diabetes**, built on top of the SmartPoli medicine-adherence app for the Happiest Health *Digital Twin Challenge 2026*.
+A digital twin for **type 2 diabetes**, built for the Happiest Health *Digital Twin Challenge 2026* inside the SmartPoli app.
 For a patient with a continuous glucose sensor, it forecasts sugar for the next 2 hours with a likely range, warns about lows and highs, explains why in plain
 words, and gives the doctor a short list of next steps. It is a risk flag for the doctor. It never diagnoses and never changes a treatment.
 
 > **Submission details (the team fills these in before 20 Oct 2026, 7:00 PM IST):**
-> Team name: `TODO` | College / incubator: `TODO` | Members: `TODO` | Demo video (at least 20 minutes): `TODO link` |
+> Live demo: `TODO URL` | Team name: `TODO` | College / incubator: `TODO` | Members: `TODO` | Demo video (at least 20 minutes): `TODO link` |
 > Architecture diagram (PDF/PPT): `TODO` | Presentation (PDF/PPT): `TODO` | Submission folder name: `Team Name_College Name`
 
 ## 1. The problem and the use case
@@ -19,13 +19,7 @@ Our twin does that for glucose:
 - **Output for the doctor:** a 2-hour sugar forecast with an 80% range, the chance of a spike or a large rise, a Calm / Watch / Alert level for lows, the top reasons,
   an amber heart note when a low alert fires for a patient with heart disease, and actions (write a note, mark as reviewed, snooze) that are recorded on the patient timeline.
 
-## 2. What SmartPoli had before this challenge (stated plainly)
-
-SmartPoli was built earlier for a different hackathon (Bit N Build, Web/App problem statement 4). It already had: accounts with patient, caregiver and doctor roles; a prescription
-decoder; dose scheduling and adherence tracking; rule-based symptom triage; medicine interaction and food checks; reports; voice and WhatsApp. It had **no machine learning, no lab values
-and no wearable data**. Everything under `ml/`, the `twin_*` backend files, the Digital Twin tab and the models in `backend/twin_models/` are new for this challenge.
-
-## 3. How it works
+## 2. How it works
 
 ```mermaid
 flowchart LR
@@ -59,6 +53,25 @@ Labels use sensor values corrected for each recording's offset against finger-pr
 Tree models won for spikes and rises and were about tied with each other, so we ship **XGBoost**. For lows the plain sugar rule and the forecast were the strongest alerters; the shipped low alert is
 driven by the forecast (`ml/lows_alert_check.py`, `ml/lows_forecast_alert.py`).
 
+## 3. Code map: where the machine learning lives
+
+The whole model is plain Python (about 1,000 lines) plus 16 small saved XGBoost files. In the order it was built:
+
+| Step | File | What it does |
+|---|---|---|
+| 1. Data | [`ml/scripts/prepare_shanghai_t2dm.py`](ml/scripts/prepare_shanghai_t2dm.py) | turns the ShanghaiT2DM files into clean tables |
+| 2. Labels | [`ml/labels.py`](ml/labels.py) | what we predict: low, spike, large rise, with the sensor-offset correction |
+| 3. Features | [`ml/features.py`](ml/features.py) | the 22 inputs per moment, with a no-future-leak test |
+| 4. Honest split | [`ml/split.py`](ml/split.py), `ml/splits.csv` | 79 development patients, 21 locked test patients |
+| 5. Baselines and model choice | [`ml/baseline.py`](ml/baseline.py), [`ml/compare_models.py`](ml/compare_models.py), `ml/model_comparison.csv` | simple rule and logistic regression against random forest, LightGBM, XGBoost and a neural net |
+| 6. Forecast | [`ml/forecast.py`](ml/forecast.py) | XGBoost forecast at +15 / +30 / +60 / +120 min with a 10-90% range |
+| 7. Final test, once | [`ml/final_test.py`](ml/final_test.py), `ml/final_test_results.txt` | scores the locked patients one time and refuses to run again |
+| 8. Re-check live | [`ml/verify_models.py`](ml/verify_models.py), `ml/verify_models_output.txt` | reloads the saved models, prints them next to the baselines on the locked patients, then runs hand-written synthetic patients through the app code (behaviour checks, not accuracy) |
+| 9. Experiments, including what failed | [`ml/EXPERIMENT_LOG.md`](ml/EXPERIMENT_LOG.md) | the low-alert experiments, with the reason each was or was not adopted |
+
+How the saved models run inside the app: [`backend/twin_service.py`](backend/twin_service.py) loads them from [`backend/twin_models/`](backend/twin_models/) and writes the doctor-screen text; [`backend/twin_features.py`](backend/twin_features.py) rebuilds
+the 22 features (a test checks it matches training exactly); [`backend/ml_router.py`](backend/ml_router.py) holds the endpoints; [`backend/static/twin.js`](backend/static/twin.js) draws the Digital Twin tab.
+
 ## 4. Results on the 21 locked test patients
 
 | What | Result |
@@ -90,7 +103,9 @@ Full output: `ml/final_test_results.txt` and `ml/extra_metrics_results.txt`.
 
 ## 7. Try it
 
-The twin is **off by default** (every twin endpoint answers "not found") so the normal app is unchanged. Turn it on with environment variables:
+**Live demo:** `TODO URL`. Open it, tap **Open the doctor demo**, then **Digital Twin** in the menu. A short on-screen tour starts by itself the first time; after that you drive it.
+
+Run it locally (optional):
 
 ```bash
 cd backend
