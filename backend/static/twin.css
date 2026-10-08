@@ -6,6 +6,7 @@
 .twn-chip { display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; padding: 3px 11px; border-radius: 999px; background: var(--paper); color: var(--ink-soft); border: 1px solid var(--line); }
 .twn-chip.alert { background: var(--alarm-soft); color: #7a2616; border-color: var(--alarm-soft); }
 .twn-chip.watch { background: var(--amber-soft); color: #6a4410; border-color: var(--amber-soft); }
+.twn-chip.highsugar { background: var(--blue-soft); color: #1b4aa0; border-color: var(--blue-soft); }
 .twn-chip.calm, .twn-chip.reviewed { background: var(--teal-soft); color: var(--teal-dark); border-color: var(--teal-soft); }
 .twn-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 12px; align-items: start; }
 .twn-layout > * { min-width: 0; }

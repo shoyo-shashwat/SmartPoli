@@ -62,6 +62,14 @@ def snap(grid, at):
     return max(ts) if ts else None
 
 
+def _fmt_dur(m):
+    m = int(round(m))
+    if m < 90:
+        return f"{m} min"
+    h, r = divmod(m, 60)
+    return f"{h} h {r} min" if r else f"{h} h"
+
+
 def _fmt_since(m):
     if m >= 1440:
         return None
@@ -171,6 +179,22 @@ def predict(profile, grid, events, at, history_minutes=360):
     pct = round(100 * p_spike)
     high_tier = "alert" if pct >= 40 else ("watch" if pct >= 15 else "calm")
     high_text = "Sugar is already above 180 mg/dL." if already_high else f"About {pct} in 100 chance of going above 180 mg/dL in the next 2 hours."
+    above = 0                                   # how long sugar has stayed above 180 (a plain rule: the spike model only covers moments not already high)
+    if already_high:
+        run = [t for t in sorted((t for t in grid if t <= now), reverse=True)]
+        first = now
+        for t in run:
+            if grid[t] <= 180 or (first - t).total_seconds() > 1200:
+                break
+            above, first = (now - t).total_seconds() / 60, t
+        if above >= 30:
+            high_text = f"Sugar has been above 180 mg/dL for {_fmt_dur(above)}."
+    focus = {"kind": "low", "tier": tier}       # what the headline is about: a low first, then a high that is happening or likely
+    if tier == "calm" and already_high:
+        headline = "Sugar is above 180" if above < 30 else f"Sugar above 180 for {_fmt_dur(above)}"
+        focus = {"kind": "high", "tier": "alert" if above >= 120 else "watch"}
+    elif tier == "calm" and high_tier == "alert":
+        headline, focus = "Sugar may go above 180 in the next 2 hours", {"kind": "high", "tier": "watch"}
 
     mean60 = _predict(models["forecast_60_mean"], row, names, contribs=True)
     low_reasons = _reasons(mean60, names, f, raises_when_negative=True)           # pushes sugar down -> raises low risk
@@ -195,9 +219,9 @@ def predict(profile, grid, events, at, history_minutes=360):
     truth = [[t.isoformat(), x] for t, x in sorted(grid.items()) if now < t <= now + timedelta(minutes=120)]
     return {
         "as_of": now.isoformat(), "current": round(v, 1), "range": {"start": min(grid).isoformat(), "end": max(grid).isoformat()},
-        "headline": headline, "low": {"tier": tier, "text": low_text, "lowest": round(lowest, 1), "lowest_in_minutes": lowest_at,
+        "headline": headline, "focus": focus, "low": {"tier": tier, "text": low_text, "lowest": round(lowest, 1), "lowest_in_minutes": lowest_at,
                                       "already_low": already_low, "alert_at_or_under": alert_t, "watch_at_or_under": watch_t, "reasons": low_reasons},
-        "high": {"tier": high_tier, "chance_percent": pct, "text": high_text, "already_high": already_high, "reasons": high_reasons},
+        "high": {"tier": high_tier, "chance_percent": pct, "text": high_text, "already_high": already_high, "minutes_above": round(above), "reasons": high_reasons},
         "large_rise_percent": round(100 * p_rise),
         "forecast": pts, "history": hist, "events": ev, "what_really_happened": truth, "checks": checks,
         "heart_note": bool(profile.get("heart_disease")) and tier != "calm",

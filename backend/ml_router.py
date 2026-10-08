@@ -146,7 +146,7 @@ def twin_worklist(at: Optional[str] = None, user: User = Depends(require_doctor_
         r = twin_service.predict(_profile_dict(profile), grid, events, _parse_at(at, profile, grid), history_minutes=0)
         state, _ = _review_state(db, pid, datetime.fromisoformat(r["as_of"]))
         rows.append({"patient_id": pid, "label": profile.label, "summary": profile.summary, "as_of": r["as_of"], "headline": r["headline"],
-                     "tier": r["low"]["tier"], "review": state, "high_tier": r["high"]["tier"], "confidence": r["confidence"], "data_source": profile.data_source})
+                     "tier": r["focus"]["tier"], "kind": r["focus"]["kind"], "review": state, "high_tier": r["high"]["tier"], "confidence": r["confidence"], "data_source": profile.data_source})
     order = {"alert": 0, "watch": 1, "calm": 2}
     rows.sort(key=lambda x: (order[x["tier"]] + (3 if x["review"] != "open" else 0), x["label"] or ""))
     return {"patients": rows}

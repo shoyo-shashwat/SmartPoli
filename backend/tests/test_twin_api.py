@@ -95,3 +95,17 @@ def test_demo_login_info_only_when_asked(monkeypatch):
         assert "demo_login" not in client.get("/twin/info").json()
         monkeypatch.setenv("SMARTPOLI_DEMO_LOGIN", "1")
         assert client.get("/twin/info").json()["demo_login"]["email"] == "doctor@smartpoli.demo"
+
+
+def test_headline_follows_a_high_that_is_already_happening():
+    import json
+    import os
+    import twin_service
+    d = json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "twin_demo_data", "demo_a.json")))
+    grid = {datetime.fromisoformat(t): v for t, v in d["readings"]}
+    events = [(datetime.fromisoformat(t), k, iu, txt) for t, k, txt, iu in d["events"]]
+    high = twin_service.predict(d["profile"], grid, events, datetime(2020, 11, 10, 19, 52))          # about 259 mg/dL
+    assert high["high"]["already_high"] and high["focus"]["kind"] == "high"
+    assert high["headline"].startswith("Sugar is above 180") or high["headline"].startswith("Sugar above 180")
+    low = twin_service.predict(d["profile"], grid, events, datetime(2020, 11, 10, 10, 7))            # the low warning still wins
+    assert low["focus"]["kind"] == "low" and low["low"]["tier"] == "alert"

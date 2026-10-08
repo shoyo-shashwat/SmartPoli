@@ -8,7 +8,7 @@
 
 (function () {
   const T = { enabled: false, loaded: false, list: [], others: [], sel: null, d: null, at: null, why: false, curve: false, playing: false, timer: null, seq: 0, wait: null, tour: null };
-  const COL = { alert: '#D3402A', watch: '#B4791F', calm: '#12876F', none: '#B4BDB8' };
+  const COL = { alert: '#D3402A', watch: '#B4791F', calm: '#12876F', high: '#1B4AA0', none: '#B4BDB8' };
   const SEG = { alert: '#D3402A', watch: '#E2A93B', calm: '#58B79B', high: '#6C9BEA' };
   const STEP_MS = 15 * 60000;
   const DATA_CREDIT = { ShanghaiT2DM: 'Data: ShanghaiT2DM (Zhao et al. 2023, CC BY 4.0), anonymised and replayed.', CGMacros: 'Data: CGMacros (PhysioNet), anonymised and replayed.' };
@@ -86,7 +86,7 @@
   function detailHtml() {
     const d = T.d;
     if (!d) return '<div class="card"><p class="twn-quiet">Loading...</p></div>';
-    const rv = d.review.state !== 'open', tier = d.low.tier, col = rv ? 'var(--ink)' : COL[tier];
+    const rv = d.review.state !== 'open', tier = d.low.tier, ftier = d.focus.tier, hi = d.focus.kind === 'high', col = rv ? 'var(--ink)' : (hi ? COL.high : COL[tier]);
     const w = ($('twnDetail') ? $('twnDetail').clientWidth : 700) - 40;
     let h = `<div class="card"><div class="twn-head"><div><b style="font-size:18px">${esc(d.label)}</b><div class="twn-quiet">${esc(d.summary || '')}</div></div>`;
     if (d.review.state === 'reviewed') h += `<span class="twn-chip reviewed">Reviewed by ${esc(d.review.info.by)}</span>`;
@@ -100,9 +100,9 @@
     if (d.heart_note && !rv) h += '<div class="twn-heart">Heart disease: lows matter more for this patient.</div>';
     if (d.review.state === 'reviewed') h += '<p class="twn-sub" style="margin-top:12px"><button class="twn-link" data-twn="reopen">Reopen</button></p>';
     else if (d.review.state === 'snoozed') h += '<p class="twn-sub" style="margin-top:12px"><button class="twn-link" data-twn="reopen">Reopen</button></p>';
-    else if (tier !== 'calm') h += '<div class="twn-acts" id="twnActs"><button class="primary" data-twn="note">Write a note</button><button class="ghost" data-twn="reviewed">Mark reviewed</button><button class="ghost" data-twn="snoozed">Snooze 1 h</button></div>';
+    else if (ftier !== 'calm') h += '<div class="twn-acts" id="twnActs"><button class="primary" data-twn="note">Write a note</button><button class="ghost" data-twn="reviewed">Mark reviewed</button><button class="ghost" data-twn="snoozed">Snooze 1 h</button></div>';
     h += `<div class="twn-more"><button class="twn-link" data-twn="why">${T.why ? 'Hide' : 'Why?'}</button><button class="twn-link" data-twn="curve">${T.curve ? 'Hide the curve' : 'Show the curve'}</button><button class="twn-link" data-twn="how">How it works</button></div>`;
-    if (T.why) h += `<div class="twn-panel">${reasonsHtml(d.low.reasons)}${d.checks.length ? `<ul class="twn-checks">${d.checks.slice(0, 3).map((c) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}</div>`;
+    if (T.why) h += `<div class="twn-panel">${reasonsHtml(hi ? d.high.reasons : d.low.reasons)}${d.checks.length ? `<ul class="twn-checks">${d.checks.slice(0, 3).map((c) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}</div>`;
     if (T.curve) h += `<div class="twn-panel">${curveSvg(d, w, true)}${hrSvg(d, Math.max(300, Math.min(900, w)))}<p class="twn-quiet" style="margin:4px 0 0">Black: so far. Green: forecast and likely range. Dotted: what really happened.</p></div>`;
     h += '</div>';
     h += `<div class="card"><details${d.activity.length ? ' open' : ''}><summary style="cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center">Activity${d.activity.length ? ' (' + d.activity.length + ')' : ''}</summary>` +
@@ -112,9 +112,9 @@
   }
 
   function listHtml() {
-    const rowTier = (p) => (p.review && p.review !== 'open' ? 'reviewed' : p.tier);
-    const lab = { alert: 'Alert', watch: 'Watch', calm: 'Calm', reviewed: 'Reviewed' };
-    const col = { alert: COL.alert, watch: COL.watch, calm: COL.calm, reviewed: COL.calm };
+    const rowTier = (p) => (p.review && p.review !== 'open' ? 'reviewed' : (p.kind === 'high' ? 'highsugar' : p.tier));
+    const lab = { alert: 'Alert', watch: 'Watch', calm: 'Calm', reviewed: 'Reviewed', highsugar: 'High' };
+    const col = { alert: COL.alert, watch: COL.watch, calm: COL.calm, reviewed: COL.calm, highsugar: COL.high };
     let h = T.list.map((p) => { const t = rowTier(p); return `<button class="twn-item${T.sel === p.patient_id ? ' sel' : ''}" data-twn-sel="${p.patient_id}"><span class="twn-dot" style="background:${col[t]}"></span><span><b>${esc(p.label)}</b></span><span class="twn-chip ${t}">${lab[t]}</span></button>`; }).join('');
     if (T.others.length) h += '<div class="twn-sep">No sugar sensor</div>' + T.others.map((n) => `<div class="twn-item twn-off"><span class="twn-dot" style="background:${COL.none}"></span><span><b>${esc(n)}</b></span><span></span></div>`).join('');
     return h;
@@ -139,7 +139,7 @@
       if (my !== T.seq) return;
       T.d = d; T.at = d.as_of;
       const row = T.list.find((p) => p.patient_id === pid);
-      if (row) { row.headline = d.headline; row.tier = d.low.tier; row.review = d.review.state; row.as_of = d.as_of; }
+      if (row) { row.headline = d.headline; row.tier = d.focus.tier; row.kind = d.focus.kind; row.review = d.review.state; row.as_of = d.as_of; }
       draw();
     } catch (e) { toast(e.message); }
   }
@@ -183,7 +183,7 @@
     let dlg = $('twnNote');
     if (!dlg) { dlg = document.createElement('dialog'); dlg.id = 'twnNote'; dlg.className = 'twn-dlg'; document.body.appendChild(dlg); }
     const d = T.d;
-    const draft = `${hhmm(d.as_of)}, ${dayLabel(d.as_of)}. Digital Twin flagged: ${d.headline.toLowerCase()}. ${d.low.text} ${d.checks[0] || ''}. Reviewed by ${(typeof currentUser !== 'undefined' && currentUser && currentUser.name) || 'doctor'}. Plan: `;
+    const draft = `${hhmm(d.as_of)}, ${dayLabel(d.as_of)}. Digital Twin flagged: ${d.headline.toLowerCase()}. ${d.focus.kind === 'high' ? d.high.text : d.low.text} ${d.checks[0] || ''}. Reviewed by ${(typeof currentUser !== 'undefined' && currentUser && currentUser.name) || 'doctor'}. Plan: `;
     dlg.innerHTML = '<form method="dialog"><b style="font-size:17px">Clinical note</b><p class="twn-sub" style="margin:6px 0 10px">Draft from what the twin saw. Edit, then save.</p><textarea id="twnNoteText"></textarea><div class="twn-acts"><button class="primary" value="save">Save note</button><button class="ghost" value="cancel">Cancel</button></div></form>';
     $('twnNoteText').value = draft;
     dlg.onclose = async () => {
