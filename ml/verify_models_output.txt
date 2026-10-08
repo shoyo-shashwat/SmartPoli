@@ -1,4 +1,4 @@
   File "C:\Users\shash\OneDrive\Desktop\SmartPoli_app\ml\verify_models.py", line 100
-    print(f"
+    print("
           ^
-SyntaxError: unterminated f-string literal (detected at line 100)
+SyntaxError: unterminated string literal (detected at line 100)
