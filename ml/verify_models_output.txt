@@ -1,0 +1,33 @@
+PART A. real data: 21 locked test patients, saved models, no retraining
+
+A1. Warning labels (AUC, higher is better)
+                                          our model    simple rule
+  spike120                                    0.817          0.662   final_test said 0.817  OK
+  large_rise120                               0.840          0.719   final_test said 0.840  OK
+
+A2. Sugar forecast, mean absolute error in mg/dL (lower is better)
+                                          our model    persistence  straight line
+  +30 min                                     10.18          12.34          13.21   final_test said 10.18  OK
+  +60 min                                     17.44          21.05          27.22   final_test said 17.44  OK
+
+A3. Low-sugar alert on the same patients (rule fixed in advance: forecast lowest of +30/+60 <= 90, 100 with heart disease)
+                                         alerts/day    lows warned  alerts that were real
+  forecast alert (ours)                        1.50       24 of 25         25 of 373 (7%)
+  plain sugar rule                             1.43       22 of 25         22 of 354 (6%)
+  (final_test said: forecast alert 1.50/day, 24 of 25; plain rule 1.43/day, 22 of 25)
+
+
+PART B. hand-written synthetic patients through the app's Twin code (behaviour checks, not accuracy)
+
+  PASS  1 flat at 110, ends 22:45, nothing logged
+        now 110 mg/dL, forecast next hour 110, 111, 113, 115 | low: calm (No low expected) | high chance 2% | expected: low calm, high chance under 15
+  INFO  1b same flat line but ends 14:45 (INFO only)
+        now 110 mg/dL, forecast next hour 111, 114, 119, 124 | low: calm (No low expected) | high chance 30% | expected: no pass/fail: the first run of check 1 used this time and failed my guess (30%); a probe showed time of day drives it, a flat line at night gives 2%
+  PASS  2 sliding 150 -> 82 over 2 h, insulin 3 h ago
+        now 82 mg/dL, forecast next hour 81, 86, 91, 96 | low: alert (Possible low in about 30 minutes) | high chance 22% | expected: low flag raised (watch or alert)
+  PASS  3 meal then climbing 120 -> 205
+        now 205 mg/dL, forecast next hour 208, 207, 202, 197 | low: calm (No low expected) | high chance 40% | expected: high chance at least 30 in 100
+  PASS  4 already low at 62
+        now 62 mg/dL, forecast next hour 63, 70, 76, 82 | low: alert (Sugar is already low) | high chance 20% | expected: already low, alert
+
+  5 of 5 behaviour checks passed
