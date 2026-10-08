@@ -7,7 +7,8 @@
 // Doctor actions go to the server (AuditLog / clinical notes), so they show on the patient timeline and report.
 
 (function () {
-  const T = { enabled: false, loaded: false, list: [], others: [], sel: null, d: null, at: null, why: false, curve: false, playing: false, timer: null, seq: 0, wait: null, tour: null };
+  const PULSE_MS = 4600;
+  const T = { pulseAt: 0, wasFall: false, enabled: false, loaded: false, list: [], others: [], sel: null, d: null, at: null, why: false, curve: false, playing: false, timer: null, seq: 0, wait: null, tour: null };
   const COL = { alert: '#D3402A', watch: '#B4791F', calm: '#12876F', high: '#1B4AA0', none: '#B4BDB8' };
   const SEG = { alert: '#D3402A', watch: '#E2A93B', calm: '#58B79B', high: '#6C9BEA' };
   const STEP_MS = 15 * 60000;
@@ -50,6 +51,30 @@
   }
 
   // ---- pictures -------------------------------------------------------------------------------------------------
+  // the key under the chart: a tiny drawing of each line, so the words match what is on the picture
+  function keyHtml(d) {
+    const it = (svg, text) => `<span class="it">${svg}${text}</span>`;
+    const sv = (w, h, inner) => `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${inner}</svg>`;
+    const main = it(sv(46, 14, '<line x1="3" x2="43" y1="7" y2="7" stroke="#16241F" stroke-width="3" stroke-linecap="round"/>'), 'Sugar so far') +
+      it(sv(46, 20, '<rect x="0" y="1" width="46" height="18" rx="3" fill="#9FD9C5" opacity=".75"/><line x1="3" x2="43" y1="10" y2="10" stroke="#0C6455" stroke-width="2.5" stroke-dasharray="6 5"/>'), 'Forecast, with its likely range') +
+      it(sv(46, 14, '<line x1="3" x2="43" y1="7" y2="7" stroke="#16241F" stroke-width="2.4" stroke-dasharray="1.5 5" stroke-linecap="round" opacity=".7"/>'), 'What really happened');
+    const hr = d.heart_rate && d.heart_rate.length >= 3 ? it(sv(30, 14, '<line x1="3" x2="27" y1="7" y2="7" stroke="#D3402A" stroke-width="2" stroke-linecap="round"/>'), 'Heart rate') : '';
+    const more = it(sv(22, 14, '<rect x="0" y="1" width="22" height="12" rx="2" fill="#FBE2DD"/>'), 'Low zone, under 70') + it(sv(22, 14, '<rect x="0" y="1" width="22" height="12" rx="2" fill="#FBEBD3"/>'), 'High zone, over 180') +
+      it(sv(12, 16, '<line x1="6" x2="6" y1="1" y2="15" stroke="#0C6455" stroke-width="2"/>'), 'Now') + it(sv(16, 16, '<path d="M8 2 l7 12 h-14z" fill="#2E6FE0"/>'), 'Insulin') + it(sv(16, 16, '<circle cx="8" cy="8" r="6" fill="#B4791F"/>'), 'Meal') + hr;
+    return `<div class="twn-key">${main}</div><div class="twn-key twn-key2">${more}</div>`;
+  }
+
+  function armPulse() {   // after a few seconds take the labels off the chart (the CSS animation fades them; this also covers reduced-motion)
+    T.pulseAt = Date.now(); clearTimeout(T.pulseTimer);
+    T.pulseTimer = setTimeout(() => { const g = document.querySelector('.twn-lbls'); if (g) g.style.display = 'none'; }, PULSE_MS);
+  }
+
+  // fast fall = at least 30 mg/dL lower than 30 minutes ago
+  function fastFall(d) {
+    const t = new Date(d.as_of).getTime() - 30 * 60000, past = d.history.filter((p) => new Date(p[0]).getTime() <= t + 4 * 60000).slice(-1)[0];
+    return !!past && past[1] - d.current >= 30;
+  }
+
   function curveSvg(d, width, full) {
     const W = Math.max(300, Math.min(900, width)), L = full ? 36 : 6, R = 8, top = full ? 10 : 8, ch = full ? 190 : 104, H = full ? 250 : ch + top * 2;
     const hist = d.history.map((p) => [new Date(p[0]).getTime(), p[1]]);
@@ -71,6 +96,19 @@
     if (full) {
       const lane = top + ch + 40;
       d.events.forEach((e) => { const x = X(new Date(e.time)); if (x < L || x > W - R) return; const o = new Date(e.time).getTime() <= now ? 1 : .35; s += e.kind === 'insulin' ? `<path d="M${x} ${lane - 9} l8 14 h-16z" fill="#2E6FE0" opacity="${o}"><title>${esc(e.text)}</title></path>` : `<circle cx="${x}" cy="${lane + 14}" r="6" fill="#B4791F" opacity="${o}"><title>${esc(e.text)}</title></circle>`; });
+    }
+    if (full) {  // short-lived labels on the chart: they pulse for a few seconds when the curve opens and again when sugar falls fast
+      const age = T.pulseAt ? Date.now() - T.pulseAt : 1e9;
+      if (age < PULSE_MS && f.length) {
+        const lastF = f[f.length - 1], lastT = d.what_really_happened.length ? d.what_really_happened[d.what_really_happened.length - 1] : null;
+        const hp = hist.filter((p) => p[0] >= t0), mid = hp.length ? hp[Math.floor(hp.length * 0.3)] : null;
+        const tx = (x, y, anchor, color, text) => `<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="13" font-weight="700" fill="${color}" stroke="#fff" stroke-width="3.5" paint-order="stroke" stroke-linejoin="round">${text}</text>`;
+        let g = '';
+        if (mid) g += tx(X(mid[0]), Y(mid[1]) - 12, 'start', '#16241F', 'sugar so far');
+        g += tx(X(new Date(lastF.time)) - 4, Y(lastF.high) - 10, 'end', '#0C6455', 'forecast and likely range');
+        if (lastT) g += tx(X(new Date(lastT[0])) - 4, Y(lastT[1]) + 22, 'end', '#5C6E68', 'what really happened');
+        s += `<g class="twn-lbls" aria-hidden="true" style="animation-delay:-${Math.round(age)}ms">${g}</g>`;
+      }
     }
     return `<svg viewBox="0 0 ${W} ${full ? H + 20 : H}" role="img" aria-label="Sugar so far and the forecast with its likely range">${s}</svg>`;
   }
@@ -103,7 +141,7 @@
     else if (ftier !== 'calm') h += '<div class="twn-acts" id="twnActs"><button class="primary" data-twn="note">Write a note</button><button class="ghost" data-twn="reviewed">Mark reviewed</button><button class="ghost" data-twn="snoozed">Snooze 1 h</button></div>';
     h += `<div class="twn-more"><button class="twn-link" data-twn="why">${T.why ? 'Hide' : 'Why?'}</button><button class="twn-link" data-twn="curve">${T.curve ? 'Hide the curve' : 'Show the curve'}</button><button class="twn-link" data-twn="how">How it works</button></div>`;
     if (T.why) h += `<div class="twn-panel">${reasonsHtml(hi ? d.high.reasons : d.low.reasons)}${d.checks.length ? `<ul class="twn-checks">${d.checks.slice(0, 3).map((c) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}</div>`;
-    if (T.curve) h += `<div class="twn-panel">${curveSvg(d, w, true)}${hrSvg(d, Math.max(300, Math.min(900, w)))}<p class="twn-quiet" style="margin:4px 0 0">Black: so far. Green: forecast and likely range. Dotted: what really happened.</p></div>`;
+    if (T.curve) h += `<div class="twn-panel">${curveSvg(d, w, true)}${hrSvg(d, Math.max(300, Math.min(900, w)))}${keyHtml(d)}</div>`;
     h += '</div>';
     h += `<div class="card"><details${d.activity.length ? ' open' : ''}><summary style="cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center">Activity${d.activity.length ? ' (' + d.activity.length + ')' : ''}</summary>` +
       (d.activity.length ? d.activity.map((a) => `<div class="twn-log"><b>${a.at ? new Date(a.at + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</b><span>${esc(a.text)} <span class="twn-quiet">(${esc(a.by)})</span></span></div>`).join('') : '<p class="twn-quiet">Nothing yet.</p>') + '</details></div>';
@@ -138,6 +176,7 @@
       const d = await apiFetch('GET', `/patients/${pid}/ml${at ? '?at=' + encodeURIComponent(at) : ''}`);
       if (my !== T.seq) return;
       T.d = d; T.at = d.as_of;
+      const fall = fastFall(d); if (fall && !T.wasFall) armPulse(); T.wasFall = fall;
       const row = T.list.find((p) => p.patient_id === pid);
       if (row) { row.headline = d.headline; row.tier = d.focus.tier; row.kind = d.focus.kind; row.review = d.review.state; row.as_of = d.as_of; }
       draw();
@@ -320,10 +359,10 @@
     if (tb) { const a = tb.dataset.tour; if (a === 'next') tourStep(1); else if (a === 'back') tourStep(-1); else tourEnd(); return; }
     const view = $('view-twin'); if (!view || !view.contains(e.target)) return;
     const s = e.target.closest('[data-twn-sel]');
-    if (s) { T.sel = +s.dataset.twnSel; T.d = null; T.why = T.curve = false; setPlaying(false); draw(); loadDetail(T.sel, (T.list.find((p) => p.patient_id === T.sel) || {}).as_of || null); return; }
+    if (s) { T.sel = +s.dataset.twnSel; T.d = null; T.why = T.curve = false; T.wasFall = false; setPlaying(false); draw(); loadDetail(T.sel, (T.list.find((p) => p.patient_id === T.sel) || {}).as_of || null); return; }
     const b = e.target.closest('[data-twn]'); if (!b) return;
     const a = b.dataset.twn;
-    if (a === 'why') { T.why = !T.why; draw(); } else if (a === 'curve') { T.curve = !T.curve; draw(); } else if (a === 'how') howDialog();
+    if (a === 'why') { T.why = !T.why; draw(); } else if (a === 'curve') { T.curve = !T.curve; if (T.curve) armPulse(); draw(); } else if (a === 'how') howDialog();
     else if (a === 'note') noteDialog(); else if (a === 'play') { setPlaying(!T.playing); draw(); } else if (a === 'tour') tourStart(b);
     else if (a === 'reopen') act('reopened'); else if (a === 'reviewed' || a === 'snoozed') act(a);
   });

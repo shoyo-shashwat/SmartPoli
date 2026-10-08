@@ -56,6 +56,17 @@ dialog.twn-dlg textarea { width: 100%; min-height: 130px; font: inherit; padding
 @media (max-width: 860px) { .twn-layout { grid-template-columns: 1fr; } .twn-strip { grid-template-columns: repeat(4, 1fr); } .twn-big { font-size: 26px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
+/* the key under the chart */
+.twn-key { display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: center; margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+.twn-key .it { display: inline-flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: var(--ink); }
+.twn-panel .twn-key .it svg { flex: none; display: block; width: auto; height: auto; max-width: none; }
+.twn-key2 { margin-top: 6px; padding-top: 0; border-top: 0; gap: 6px 22px; }
+.twn-key2 .it { font-size: 13.5px; font-weight: 500; color: var(--ink-soft); gap: 7px; }
+/* labels on the chart: a few seconds only, pulsing twice, then gone */
+.twn-lbls { opacity: 0; animation: twnPulse 4.6s ease-in-out forwards; }
+@keyframes twnPulse { 0% { opacity: 0; } 10% { opacity: 1; } 28% { opacity: .5; } 46% { opacity: 1; } 64% { opacity: .5; } 80% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .twn-lbls { animation: none !important; opacity: 1; } }   /* no pulsing: shown steadily, then removed by the timer */
+
 /* ---- v2: less text, more picture ------------------------------------------------------------------------------ */
 .twn-big { font-size: 28px; margin: 10px 0 6px; }
 .twn-mini { margin-top: 6px; border-radius: var(--radius-sm); overflow: hidden; }

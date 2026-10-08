@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Curve legend mockup</title>
+<style>
+  :root { --ink:#16241F; --ink-soft:#5C6E68; --paper:#F4F6F3; --line:#DCE3DE; --teal:#12876F; --teal-dark:#0C6455; --teal-soft:#DDF1EA; --radius:14px; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif; line-height:1.5; }
+  main { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  .sub { color: var(--ink-soft); margin: 0 0 24px; font-size: 15px; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; padding:3px 10px; border-radius:999px; background:#E9ECEA; color:var(--ink-soft); }
+  .tag.rec { background:var(--teal-soft); color:var(--teal-dark); }
+  .card { background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:20px; margin-bottom:22px; }
+  .card h2 { font-size:18px; margin:8px 0 4px; }
+  .note { color:var(--ink-soft); font-size:14px; margin:0 0 12px; }
+  .chart svg { width:100%; height:auto; display:block; }
+  .quiet { color:var(--ink-soft); font-size:14px; margin:6px 0 0; }
+  .lg { display:flex; flex-wrap:wrap; gap:10px 26px; align-items:center; margin-top:10px; padding-top:12px; border-top:1px solid var(--line); }
+  .it { display:inline-flex; align-items:center; gap:10px; font-size:15px; font-weight:600; color:var(--ink); }
+  .it svg { flex:none; display:block; }
+  .lg2 { display:flex; flex-wrap:wrap; gap:6px 22px; align-items:center; margin-top:8px; font-size:13.5px; color:var(--ink-soft); }
+  .lg2 .it { font-size:13.5px; font-weight:500; color:var(--ink-soft); gap:7px; }
+  .phone { max-width: 390px; }
+  .row { display:grid; grid-template-columns: 1fr; gap:22px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Making the curve readable</h1>
+  <p class="sub">Real chart from demo patient A at 10:07 on 10 Nov 2020 (the moment the twin warns of a low). Same chart code as the app; only the explanation changes.</p>
+
+  <div class="card">
+    <span class="tag">Now</span>
+    <h2>One sentence of words</h2>
+    <div class="chart" data-v="now"></div>
+    <p class="quiet">Black: so far. Green: forecast and likely range. Dotted: what really happened.</p>
+  </div>
+
+  <div class="card">
+    <span class="tag rec">Option A, suggested</span>
+    <h2>A key under the chart, with a tiny drawing of each line</h2>
+    <p class="note">Each item shows exactly what you will see on the chart: a black line, green dashes on a green band, and a dotted line.</p>
+    <div class="chart" data-v="a"></div>
+    <div class="lg" id="lgA"></div>
+    <div class="lg2" id="lgA2"></div>
+  </div>
+
+  <div class="card">
+    <span class="tag">Option B</span>
+    <h2>Labels written on the chart itself</h2>
+    <p class="note">No key to look up. The words sit next to the line they describe. Can get crowded on a small screen.</p>
+    <div class="chart" data-v="b"></div>
+  </div>
+
+  <div class="card">
+    <span class="tag">Option C</span>
+    <h2>Both: labels on the chart and the key underneath</h2>
+    <div class="chart" data-v="c"></div>
+    <div class="lg" id="lgC"></div>
+  </div>
+
+  <div class="card">
+    <span class="tag rec">Option A on a phone</span>
+    <h2>How the key wraps on a narrow screen</h2>
+    <div class="phone">
+      <div class="chart" data-v="a" data-w="360"></div>
+      <div class="lg" id="lgP"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const D = {"as_of": "2020-11-10T10:07:00", "current": 97.2, "range": {"start": "2020-11-09T11:22:00", "end": "2020-11-23T09:37:00"}, "headline": "Possible low in about 30 minutes", "focus": {"kind": "low", "tier": "alert"}, "low": {"tier": "alert", "text": "Sugar is 97 mg/dL and the forecast falls to about 83 mg/dL within 30 minutes.", "lowest": 82.8, "lowest_in_minutes": 30, "already_low": false, "alert_at_or_under": 100, "watch_at_or_under": 120, "reasons": [{"text": "The highest reading in the last hour was 203 mg/dL", "up": true, "weight": 100}, {"text": "Sugar fell 56 mg/dL in the last 30 minutes", "up": true, "weight": 58}, {"text": "A meal was logged 3.2 hours ago", "up": true, "weight": 30}, {"text": "Sugar is 97 mg/dL", "up": false, "weight": 19}]}, "high": {"tier": "watch", "chance_percent": 24, "text": "About 24 in 100 chance of going above 180 mg/dL in the next 2 hours.", "already_high": false, "minutes_above": 0, "reasons": [{"text": "Time of day", "up": true, "weight": 100}, {"text": "Age 74", "up": true, "weight": 69}, {"text": "Sugar fell 56 mg/dL in the last 30 minutes", "up": false, "weight": 69}, {"text": "Sugar is 97 mg/dL", "up": false, "weight": 54}]}, "large_rise_percent": 6, "forecast": [{"minutes_ahead": 15, "time": "2020-11-10T10:22:00", "mg_dl": 84.1, "low": 75.5, "high": 95.9}, {"minutes_ahead": 30, "time": "2020-11-10T10:37:00", "mg_dl": 82.8, "low": 67.0, "high": 104.8}, {"minutes_ahead": 45, "time": "2020-11-10T10:52:00", "mg_dl": 84.8, "low": 62.7, "high": 112.5}, {"minutes_ahead": 60, "time": "2020-11-10T11:07:00", "mg_dl": 86.8, "low": 58.3, "high": 120.1}, {"minutes_ahead": 75, "time": "2020-11-10T11:22:00", "mg_dl": 89.7, "low": 58.3, "high": 128.7}, {"minutes_ahead": 90, "time": "2020-11-10T11:37:00", "mg_dl": 92.6, "low": 58.2, "high": 137.3}, {"minutes_ahead": 105, "time": "2020-11-10T11:52:00", "mg_dl": 95.5, "low": 58.2, "high": 146.0}, {"minutes_ahead": 120, "time": "2020-11-10T12:07:00", "mg_dl": 98.4, "low": 58.2, "high": 154.6}], "history": [["2020-11-10T04:07:00", 153.0], ["2020-11-10T04:22:00", 145.8], ["2020-11-10T04:37:00", 144.0], ["2020-11-10T04:52:00", 142.2], ["2020-11-10T05:07:00", 147.6], ["2020-11-10T05:22:00", 151.2], ["2020-11-10T05:37:00", 151.2], ["2020-11-10T05:52:00", 158.4], ["2020-11-10T06:07:00", 162.0], ["2020-11-10T06:22:00", 163.8], ["2020-11-10T06:37:00", 167.4], ["2020-11-10T06:52:00", 169.2], ["2020-11-10T07:07:00", 172.8], ["2020-11-10T07:22:00", 178.2], ["2020-11-10T07:37:00", 183.6], ["2020-11-10T07:52:00", 185.4], ["2020-11-10T08:07:00", 190.8], ["2020-11-10T08:22:00", 194.4], ["2020-11-10T08:37:00", 203.4], ["2020-11-10T08:52:00", 212.4], ["2020-11-10T09:07:00", 203.4], ["2020-11-10T09:22:00", 178.2], ["2020-11-10T09:37:00", 153.0], ["2020-11-10T09:52:00", 126.0], ["2020-11-10T10:07:00", 97.2]], "events": [{"time": "2020-11-10T06:52:00", "kind": "meal", "text": "Cereal 100 g"}, {"time": "2020-11-10T06:52:00", "kind": "insulin", "text": "insulin glargine, 14 IU, Humulin 70/30, 12 IU"}, {"time": "2020-11-10T10:37:00", "kind": "meal", "text": "Water bamboo 60 g"}, {"time": "2020-11-10T10:37:00", "kind": "insulin", "text": "Humulin 70/30, 3 IU"}, {"time": "2020-11-10T10:37:00", "kind": "oral", "text": "voglibose 0.2 g"}], "what_really_happened": [["2020-11-10T10:22:00", 75.6], ["2020-11-10T10:37:00", 61.2], ["2020-11-10T10:52:00", 55.8], ["2020-11-10T11:07:00", 61.2], ["2020-11-10T11:22:00", 75.6], ["2020-11-10T11:37:00", 77.4], ["2020-11-10T11:52:00", 75.6], ["2020-11-10T12:07:00", 68.4]], "checks": ["Last insulin 3.2 hours ago (insulin glargine, 14 IU, Humulin 70/30, 12 IU)", "Last meal logged 3.2 hours ago", "This patient had 1 low in the readings so far (14 days on record)", "The sensor reads about 10 mg/dL above this patient's finger-prick checks, so real sugar may be lower."], "heart_note": true, "confidence": "ok", "confidence_reason": null, "model_version": "twin-1 (XGBoost, trained on ShanghaiT2DM)", "training_data": "ShanghaiT2DM (Zhao et al., Scientific Data 2023), 79 patients; checked on 21 patients it had never seen", "disclaimer": "Risk flag for the doctor, not a diagnosis or a treatment change.", "heart_rate": []};
+const pad = (n) => String(n).padStart(2, '0');
+const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function curveSvg(d, width, full) {
+    const W = Math.max(300, Math.min(900, width)), L = full ? 36 : 6, R = 8, top = full ? 10 : 8, ch = full ? 190 : 104, H = full ? 250 : ch + top * 2;
+    const hist = d.history.map((p) => [new Date(p[0]).getTime(), p[1]]);
+    const now = new Date(d.as_of).getTime(), span = full ? 6 * 3600000 : 3 * 3600000, t0 = now - span, t1 = now + 125 * 60000;
+    const X = (t) => L + (t - t0) / (t1 - t0) * (W - L - R);
+    const Y = (v) => top + ch - (Math.max(40, Math.min(240, v)) - 40) / 200 * ch;
+    let s = `<rect x="${L}" y="${Y(70)}" width="${W - L - R}" height="${Y(40) - Y(70)}" fill="#FBE2DD" opacity=".7"/><rect x="${L}" y="${Y(240)}" width="${W - L - R}" height="${Y(180) - Y(240)}" fill="#FBEBD3" opacity=".7"/>`;
+    if (full) {
+      [70, 120, 180].forEach((g) => { s += `<line x1="${L}" x2="${W - R}" y1="${Y(g)}" y2="${Y(g)}" stroke="#8B9A94" stroke-dasharray="4 4"/><text x="${L - 6}" y="${Y(g) + 4}" text-anchor="end" font-size="12" fill="#5C6E68">${g}</text>`; });
+      for (let t = Math.ceil(t0 / 3600000) * 3600000; t <= t1; t += (W < 600 ? 2 : 1) * 3600000) s += `<text x="${X(t)}" y="${top + ch + 18}" text-anchor="middle" font-size="12" fill="#5C6E68">${pad(new Date(t).getHours())}:00</text>`;
+    } else {
+      [70, 180].forEach((g) => { s += `<line x1="${L}" x2="${W - R}" y1="${Y(g)}" y2="${Y(g)}" stroke="#8B9A94" stroke-dasharray="3 5" opacity=".6"/>`; });
+    }
+    const f = d.forecast, up = f.map((p) => `${X(new Date(p.time))},${Y(p.high)}`), dn = f.slice().reverse().map((p) => `${X(new Date(p.time))},${Y(p.low)}`);
+    s += `<polygon points="${X(now)},${Y(d.current)} ${up.join(' ')} ${dn.join(' ')}" fill="#9FD9C5" opacity=".75"/><polyline fill="none" stroke="#0C6455" stroke-width="2.5" stroke-dasharray="6 5" points="${X(now)},${Y(d.current)} ${f.map((p) => `${X(new Date(p.time))},${Y(p.mg_dl)}`).join(' ')}"/>`;
+    if (full && d.what_really_happened.length) s += `<polyline fill="none" stroke="#16241F" stroke-width="2" stroke-dasharray="2 4" opacity=".6" points="${X(now)},${Y(d.current)} ${d.what_really_happened.map((p) => `${X(new Date(p[0]))},${Y(p[1])}`).join(' ')}"/>`;
+    s += `<polyline fill="none" stroke="#16241F" stroke-width="3" stroke-linejoin="round" points="${hist.filter((p) => p[0] >= t0).map((p) => `${X(p[0])},${Y(p[1])}`).join(' ')}"/><line x1="${X(now)}" x2="${X(now)}" y1="${top}" y2="${top + ch}" stroke="#0C6455" stroke-width="1.5"/><circle cx="${X(now)}" cy="${Y(d.current)}" r="5" fill="#16241F"/>`;
+    if (!full) s += `<text x="${X(now) - 6}" y="${top + 12}" text-anchor="end" font-size="12" font-weight="700" fill="#0C6455">now</text>`;
+    if (full) {
+      const lane = top + ch + 40;
+      d.events.forEach((e) => { const x = X(new Date(e.time)); if (x < L || x > W - R) return; const o = new Date(e.time).getTime() <= now ? 1 : .35; s += e.kind === 'insulin' ? `<path d="M${x} ${lane - 9} l8 14 h-16z" fill="#2E6FE0" opacity="${o}"><title>${esc(e.text)}</title></path>` : `<circle cx="${x}" cy="${lane + 14}" r="6" fill="#B4791F" opacity="${o}"><title>${esc(e.text)}</title></circle>`; });
+    }
+    return `<svg viewBox="0 0 ${W} ${full ? H + 20 : H}" role="img" aria-label="Sugar so far and the forecast with its likely range">${s}</svg>`;
+  }
+
+  
+function curveSvgB(d, width, full) {
+    const W = Math.max(300, Math.min(900, width)), L = full ? 36 : 6, R = 8, top = full ? 10 : 8, ch = full ? 190 : 104, H = full ? 250 : ch + top * 2;
+    const hist = d.history.map((p) => [new Date(p[0]).getTime(), p[1]]);
+    const now = new Date(d.as_of).getTime(), span = full ? 6 * 3600000 : 3 * 3600000, t0 = now - span, t1 = now + 125 * 60000;
+    const X = (t) => L + (t - t0) / (t1 - t0) * (W - L - R);
+    const Y = (v) => top + ch - (Math.max(40, Math.min(240, v)) - 40) / 200 * ch;
+    let s = `<rect x="${L}" y="${Y(70)}" width="${W - L - R}" height="${Y(40) - Y(70)}" fill="#FBE2DD" opacity=".7"/><rect x="${L}" y="${Y(240)}" width="${W - L - R}" height="${Y(180) - Y(240)}" fill="#FBEBD3" opacity=".7"/>`;
+    if (full) {
+      [70, 120, 180].forEach((g) => { s += `<line x1="${L}" x2="${W - R}" y1="${Y(g)}" y2="${Y(g)}" stroke="#8B9A94" stroke-dasharray="4 4"/><text x="${L - 6}" y="${Y(g) + 4}" text-anchor="end" font-size="12" fill="#5C6E68">${g}</text>`; });
+      for (let t = Math.ceil(t0 / 3600000) * 3600000; t <= t1; t += (W < 600 ? 2 : 1) * 3600000) s += `<text x="${X(t)}" y="${top + ch + 18}" text-anchor="middle" font-size="12" fill="#5C6E68">${pad(new Date(t).getHours())}:00</text>`;
+    } else {
+      [70, 180].forEach((g) => { s += `<line x1="${L}" x2="${W - R}" y1="${Y(g)}" y2="${Y(g)}" stroke="#8B9A94" stroke-dasharray="3 5" opacity=".6"/>`; });
+    }
+    const f = d.forecast, up = f.map((p) => `${X(new Date(p.time))},${Y(p.high)}`), dn = f.slice().reverse().map((p) => `${X(new Date(p.time))},${Y(p.low)}`);
+    s += `<polygon points="${X(now)},${Y(d.current)} ${up.join(' ')} ${dn.join(' ')}" fill="#9FD9C5" opacity=".75"/><polyline fill="none" stroke="#0C6455" stroke-width="2.5" stroke-dasharray="6 5" points="${X(now)},${Y(d.current)} ${f.map((p) => `${X(new Date(p.time))},${Y(p.mg_dl)}`).join(' ')}"/>`;
+    if (full && d.what_really_happened.length) s += `<polyline fill="none" stroke="#16241F" stroke-width="2" stroke-dasharray="2 4" opacity=".6" points="${X(now)},${Y(d.current)} ${d.what_really_happened.map((p) => `${X(new Date(p[0]))},${Y(p[1])}`).join(' ')}"/>`;
+    s += `<polyline fill="none" stroke="#16241F" stroke-width="3" stroke-linejoin="round" points="${hist.filter((p) => p[0] >= t0).map((p) => `${X(p[0])},${Y(p[1])}`).join(' ')}"/><line x1="${X(now)}" x2="${X(now)}" y1="${top}" y2="${top + ch}" stroke="#0C6455" stroke-width="1.5"/><circle cx="${X(now)}" cy="${Y(d.current)}" r="5" fill="#16241F"/>`;
+    if (!full) s += `<text x="${X(now) - 6}" y="${top + 12}" text-anchor="end" font-size="12" font-weight="700" fill="#0C6455">now</text>`;
+    if (full) {
+      const lane = top + ch + 40;
+      d.events.forEach((e) => { const x = X(new Date(e.time)); if (x < L || x > W - R) return; const o = new Date(e.time).getTime() <= now ? 1 : .35; s += e.kind === 'insulin' ? `<path d="M${x} ${lane - 9} l8 14 h-16z" fill="#2E6FE0" opacity="${o}"><title>${esc(e.text)}</title></path>` : `<circle cx="${x}" cy="${lane + 14}" r="6" fill="#B4791F" opacity="${o}"><title>${esc(e.text)}</title></circle>`; });
+    }
+    const lastF = f[f.length - 1], lastT = d.what_really_happened.length ? d.what_really_happened[d.what_really_happened.length - 1] : null;
+    const hp = hist.filter((p) => p[0] >= t0), mid = hp[Math.max(0, Math.floor(hp.length * 0.3))];
+    s += `<text x="${X(mid[0])}" y="${Y(mid[1]) - 12}" font-size="13" font-weight="700" fill="#16241F">sugar so far</text>`;
+    s += `<text x="${X(new Date(lastF.time)) - 4}" y="${Y(lastF.high) - 10}" text-anchor="end" font-size="13" font-weight="700" fill="#0C6455">forecast and likely range</text>`;
+    if (lastT) s += `<text x="${X(new Date(lastT[0])) - 4}" y="${Y(lastT[1]) + 22}" text-anchor="end" font-size="13" font-weight="700" fill="#5C6E68">what really happened</text>`;
+    return `<svg viewBox="0 0 ${W} ${full ? H + 20 : H}" role="img" aria-label="Sugar so far and the forecast with its likely range">${s}</svg>`;
+  }
+
+  
+
+const KEY = `
+  <span class="it"><svg width="46" height="14" viewBox="0 0 46 14" aria-hidden="true"><line x1="3" x2="43" y1="7" y2="7" stroke="#16241F" stroke-width="3" stroke-linecap="round"/></svg>Sugar so far</span>
+  <span class="it"><svg width="46" height="20" viewBox="0 0 46 20" aria-hidden="true"><rect x="0" y="1" width="46" height="18" rx="3" fill="#9FD9C5" opacity=".75"/><line x1="3" x2="43" y1="10" y2="10" stroke="#0C6455" stroke-width="2.5" stroke-dasharray="6 5" stroke-linecap="butt"/></svg>Forecast, with its likely range</span>
+  <span class="it"><svg width="46" height="14" viewBox="0 0 46 14" aria-hidden="true"><line x1="3" x2="43" y1="7" y2="7" stroke="#16241F" stroke-width="2.4" stroke-dasharray="1.5 5" stroke-linecap="round" opacity=".7"/></svg>What really happened</span>`;
+const KEY2 = `
+  <span class="it"><svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true"><rect x="0" y="1" width="22" height="12" rx="2" fill="#FBE2DD"/></svg>Low zone, under 70</span>
+  <span class="it"><svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true"><rect x="0" y="1" width="22" height="12" rx="2" fill="#FBEBD3"/></svg>High zone, over 180</span>
+  <span class="it"><svg width="12" height="16" viewBox="0 0 12 16" aria-hidden="true"><line x1="6" x2="6" y1="1" y2="15" stroke="#0C6455" stroke-width="2"/></svg>Now</span>
+  <span class="it"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2 l7 12 h-14z" fill="#2E6FE0"/></svg>Insulin</span>
+  <span class="it"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="#B4791F"/></svg>Meal</span>`;
+document.getElementById('lgA').innerHTML = KEY; document.getElementById('lgA2').innerHTML = KEY2;
+document.getElementById('lgC').innerHTML = KEY; document.getElementById('lgP').innerHTML = KEY;
+document.querySelectorAll('.chart').forEach((el) => {
+  const v = el.dataset.v, w = el.dataset.w ? +el.dataset.w : 900;
+  el.innerHTML = (v === 'b' || v === 'c') ? curveSvgB(D, w, true) : curveSvg(D, w, true);
+});
+</script>
+</body>
+</html>
