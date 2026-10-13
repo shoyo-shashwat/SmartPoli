@@ -6,7 +6,7 @@ words, and gives the doctor a short list of next steps. It is a risk flag for th
 
 > **Submission details (the team fills these in before 20 Oct 2026, 7:00 PM IST):**
 > Live demo: [https://smartpoli-kxzt.onrender.com](https://smartpoli-kxzt.onrender.com) | Team name: **Nexons** | College: **GL Bajaj Institute of Technology and Management** | Members: **Garv Chopra, Shashwat Shukla, Vishesh Agrahari** | Demo video (at least 20 minutes): `TODO link` |
-> Architecture diagram (PDF/PPT): `TODO` | Presentation (PDF/PPT): `TODO` | Submission folder name: `Nexons_GL Bajaj Institute of Technology and Management`
+> Architecture diagram: [PDF](docs/architecture/architecture.pdf) | Presentation (PDF/PPT): `TODO` | Submission folder name: `Nexons_GL Bajaj Institute of Technology and Management`
 
 ## 1. The problem and the use case
 
@@ -20,6 +20,9 @@ Our twin does that for glucose:
   an amber heart note when a low alert fires for a patient with heart disease, and actions (write a note, mark as reviewed, snooze) that are recorded on the patient timeline.
 
 ## 2. How it works
+
+![SmartPoli Digital Twin architecture](docs/architecture/architecture.png)
+
 
 ```mermaid
 flowchart LR
