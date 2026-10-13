@@ -1,16 +1,24 @@
 # SmartPoli Digital Twin
 
-A digital twin for **type 2 diabetes**, built for the Happiest Health *Digital Twin Challenge 2026* inside the SmartPoli app.
+**Project title:** SmartPoli Digital Twin: a virtual patient for type 2 diabetes. Built for the Happiest Health *Digital Twin Challenge 2026* inside the SmartPoli app.
+
 For a patient with a continuous glucose sensor, it forecasts sugar for the next 2 hours with a likely range, warns about lows and highs, explains why in plain
 words, and gives the doctor a short list of next steps. It is a risk flag for the doctor. It never diagnoses and never changes a treatment.
 
-> **Submission details (the team fills these in before 20 Oct 2026, 7:00 PM IST):**
-> Live demo: [https://smartpoli-kxzt.onrender.com](https://smartpoli-kxzt.onrender.com) | Team name: **Nexons** | College: **GL Bajaj Institute of Technology and Management** | Members: **Garv Chopra, Shashwat Shukla, Vishesh Agrahari** | Demo video (at least 20 minutes): `TODO link` |
-> Architecture diagram: [PDF](docs/architecture/architecture.pdf) | Presentation (PDF/PPT): `TODO` | Submission folder name: `Nexons_GL Bajaj Institute of Technology and Management`
+**Contents:** [1. Team](#1-team-details-and-college) · [2. Problem and use case](#2-problem-statement-and-healthcare-use-case) · [3. Technical stack](#3-technical-stack) · [4. AI/ML model](#4-aiml-model) · [5. Architecture diagram](#5-architecture-diagram) · [6. Demo video](#6-demo-video) · [7. Presentation](#7-presentation) · [8. Open-source licence](#8-open-source-licence) · [9. Setup](#9-setup) · Extras: [10. Results](#10-results-on-the-21-locked-test-patients) · [11. Limits](#11-limits-you-should-know-about) · [12. Code map](#12-code-map-and-reproducing-the-ml) · [13. Data and credits](#13-data-and-credits)
 
-**Contents:** [1. Problem](#1-the-problem-and-the-use-case) · [2. How it works](#2-how-it-works) · [3. Technical stack](#3-technical-stack) · [4. AI/ML model](#4-aiml-model) · [5. Setup](#5-setup) · [6. Licence](#6-licence) · Extras: [7. Results](#7-results-on-the-21-locked-test-patients) · [8. Limits](#8-limits-you-should-know-about) · [9. Code map](#9-code-map-and-reproducing-the-ml) · [10. Data and credits](#10-data-and-credits)
+## 1. Team details and college
 
-## 1. The problem and the use case
+| | |
+|---|---|
+| Team name | **Nexons** |
+| College | **GL Bajaj Institute of Technology and Management** |
+| Members | **Garv Chopra, Shashwat Shukla, Vishesh Agrahari** |
+| Live demo | [https://smartpoli-kxzt.onrender.com](https://smartpoli-kxzt.onrender.com) |
+| Code | [github.com/shoyo-shashwat/SmartPoli](https://github.com/shoyo-shashwat/SmartPoli) |
+| Submission folder | `Nexons_GL Bajaj Institute of Technology and Management` (deadline 20 Oct 2026, 7:00 PM IST) |
+
+## 2. Problem statement and healthcare use case
 
 People with type 2 diabetes on insulin or tablets can swing too low (risky, especially with heart disease) or too high without warning. Doctors see snapshots, not the
 next few hours. The challenge asks for a *virtual patient*: a model that fuses static health records with a live wearable stream and predicts an adverse event before it happens.
@@ -20,14 +28,6 @@ Our twin does that for glucose:
 - **Dynamic stream:** continuous glucose readings every 15 minutes plus logged meals and insulin or tablet doses.
 - **Output for the doctor:** a 2-hour sugar forecast with an 80% range, the chance of a spike or a large rise, a Calm / Watch / Alert level for lows, the top reasons,
   an amber heart note when a low alert fires for a patient with heart disease, and actions (write a note, mark as reviewed, snooze) that are recorded on the patient timeline.
-
-## 2. How it works
-
-![SmartPoli Digital Twin architecture](docs/architecture/architecture.png)
-
-Read it left to right. The **models are trained offline** on the ShanghaiT2DM dataset and saved as 16 small files. In the **app**, the backend rebuilds the same 22 inputs from a patient's
-records and glucose stream, runs the saved models, and returns the forecast, alerts and reasons. The **doctor dashboard** (Digital Twin tab) shows a worklist ranked by risk, a 2-hour strip,
-the reasons and the forecast curve, and lets the doctor write a note, mark a patient reviewed or snooze. Those actions are saved on the patient timeline.
 
 ## 3. Technical stack
 
@@ -39,7 +39,7 @@ the reasons and the forecast curve, and lets the doctor write a note, mark a pat
 | Doctor dashboard | Plain JavaScript, HTML and CSS served by the same backend (no front-end framework); the forecast curve is drawn as inline SVG |
 | Hosting | One Render web service from a Docker image: the app, the API and the models together |
 | Tests | pytest |
-| Data | ShanghaiT2DM (training and testing), CGMacros (demo display only); see [section 10](#10-data-and-credits) |
+| Data | ShanghaiT2DM (training and testing), CGMacros (demo display only); see [section 13](#13-data-and-credits) |
 
 ## 4. AI/ML model
 
@@ -75,7 +75,30 @@ Labels use sensor values corrected for each recording's offset against finger-pr
 Tree models won for spikes and rises and were about tied with each other, so we ship **XGBoost**. For lows the plain sugar rule and the forecast were the strongest alerters; the shipped low alert is
 driven by the forecast (`ml/lows_alert_check.py`, `ml/lows_forecast_alert.py`).
 
-## 5. Setup
+## 5. Architecture diagram
+
+![SmartPoli Digital Twin architecture](docs/architecture/architecture.png)
+
+PDF version for the submission: [`docs/architecture/architecture.pdf`](docs/architecture/architecture.pdf).
+
+Read it left to right. The **models are trained offline** on the ShanghaiT2DM dataset and saved as 16 small files. In the **app**, the backend rebuilds the same 22 inputs from a patient's
+records and glucose stream, runs the saved models, and returns the forecast, alerts and reasons. The **doctor dashboard** (Digital Twin tab) shows a worklist ranked by risk, a 2-hour strip,
+the reasons and the forecast curve, and lets the doctor write a note, mark a patient reviewed or snooze. Those actions are saved on the patient timeline.
+
+## 6. Demo video
+
+Demo video (at least 20 minutes): `TODO link` (unlisted YouTube, or a recorded PowerPoint).
+
+## 7. Presentation
+
+Presentation with project details and outcome (PDF/PPT): `TODO link or file`.
+
+## 8. Open-source licence
+
+The code in this repository is released under the **MIT License** (see [`LICENSE`](LICENSE)). The ShanghaiT2DM data and anything derived from it, including the demo patient and the trained models, stay under
+**CC BY 4.0**: keep the credit in section 13 when you reuse them. Python packages keep their own licences. This software is not a medical device and is not for medical decisions.
+
+## 9. Setup
 
 **Live demo:** [https://smartpoli-kxzt.onrender.com](https://smartpoli-kxzt.onrender.com). Open it, tap **Open the doctor demo**, then **Digital Twin** in the menu. A short on-screen tour starts by itself the first time; after that you drive it.
 
@@ -96,18 +119,13 @@ Move the replay slider on demo patient A to 10 Nov 2020: at 09:52 the twin shows
 
 **Deploy your own copy on Render:** [`docs/RENDER_DEMO_DEPLOY.md`](docs/RENDER_DEMO_DEPLOY.md). Settings and data notes: [`docs/DEMO_COPY.md`](docs/DEMO_COPY.md).
 
-The machine-learning steps are in [section 9](#9-code-map-and-reproducing-the-ml).
-
-## 6. Licence
-
-The code in this repository is released under the **MIT License** (see [`LICENSE`](LICENSE)). The ShanghaiT2DM data and anything derived from it, including the demo patient and the trained models, stay under
-**CC BY 4.0**: keep the credit in section 10 when you reuse them. Python packages keep their own licences. This software is not a medical device and is not for medical decisions.
+The machine-learning steps are in [section 12](#12-code-map-and-reproducing-the-ml).
 
 ---
 
 # Extras
 
-## 7. Results on the 21 locked test patients
+## 10. Results on the 21 locked test patients
 
 ![Forecast error against "sugar stays where it is"](docs/forecast_error_chart.png)
 
@@ -122,7 +140,7 @@ The code in this repository is released under the **MIT License** (see [`LICENSE
 
 Full output: `ml/final_test_results.txt` and `ml/extra_metrics_results.txt`.
 
-## 8. Limits you should know about
+## 11. Limits you should know about
 
 - **Most low alerts are precautionary.** About 1 alert in 14 is followed by a real low within the hour (precision 7%), while 96% of real lows were warned about. We label it Calm / Watch / Alert, never "a low is coming".
 - **Small low-event sample:** 25 events from 6 patients (13 of them from the demo patient). Treat the low-alert result as a strong hint, not proof.
@@ -130,7 +148,7 @@ Full output: `ml/final_test_results.txt` and `ml/extra_metrics_results.txt`.
 - **Adherence is untested:** missed doses feed the model through "time since the last dose", but how well it reacts to them has not been measured.
 - A sensor that reads too low or too high can cause false alarms. The twin works from the sensor reading only.
 
-## 9. Code map and reproducing the ML
+## 12. Code map and reproducing the ML
 
 The whole model is plain Python (about 1,000 lines) plus 16 small saved XGBoost files. In the order it was built:
 
@@ -162,7 +180,7 @@ python forecast.py data/shanghai_t2dm_clean
 # python final_test.py data/shanghai_t2dm_clean   # the locked-test run: results are already saved, it refuses to run twice
 ```
 
-## 10. Data and credits
+## 13. Data and credits
 
 - **ShanghaiT2DM** (Zhao Q. et al., *Chinese diabetes datasets for data-driven machine learning*, Scientific Data 2023, [paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9849330/)), **CC BY 4.0**. 100 patients, 109 recordings, 15-minute glucose, meals, medicines and background facts.
   All model training and testing use only this dataset. One anonymised recording is included as **demo patient A** (`backend/twin_demo_data/demo_a.json`). It is real research data, not a made-up patient, and is credited in the app.
