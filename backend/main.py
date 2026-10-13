@@ -194,7 +194,7 @@ def _page_route(file_name: str):
 
 
 for _path, _file in PAGES.items():
-    app.add_api_route(_path, _page_route(_file), methods=["GET"], include_in_schema=False)
+    app.add_api_route(_path, _page_route(_file), methods=["GET", "HEAD"], include_in_schema=False)
 
 
 @app.get("/static/{name}.html", include_in_schema=False)
